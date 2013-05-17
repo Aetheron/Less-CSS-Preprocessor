@@ -6,7 +6,7 @@
       var watched_files = [],
           $watched_links;
       
-      $watched_links = $('head link[type="text/css"][src$=".less"]', context).each(function () {
+      $watched_links = $('head link[src$=".less"]', context).each(function () {
         
         // Only grab the portion of the url up to, but not including, the '?'.
         watched_files.push($(this).attr('href').match(/^([^\?]+)/)[1]);
@@ -53,7 +53,7 @@
                       new_file = response[i].new_file;
                   
                   // Math.random() at the end forces a reload of the file.
-                  $('head link[type="text/css"][href^="' + old_file + '"]', context).replaceWith($('<link type="text/css" rel="stylesheet" media="all" />').attr('href', new_file + '?' + Math.random()));
+                  $('head link[href^="' + old_file + '"]', context).replaceWith($('<link type="text/css" rel="stylesheet" media="all" />').attr('href', new_file + '?' + Math.random()));
                   
                   watched_files[watched_files.indexOf(old_file)] = new_file;
                 }
