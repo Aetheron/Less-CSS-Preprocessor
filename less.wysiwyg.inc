@@ -17,13 +17,19 @@ function less_wysiwyg_editor_settings_alter(&$settings, $context) {
   
   switch ($wysiwyg) {
     case 'tinymce':
-      $stylesheets = explode(',', $settings['content_css']);
+      if (!empty($settings['content_css'])) {
+        $stylesheets = explode(',', $settings['content_css']);
+      }
       break;
     case 'fckeditor':
-      $stylesheets = explode(',', $settings['EditorAreaCSS']);
+      if (!empty($settings['EditorAreaCSS'])) {
+        $stylesheets = explode(',', $settings['EditorAreaCSS']);
+      }
       break;
     case 'ckeditor':
-      $stylesheets = $settings['contentsCss'];
+      if (!empty($settings['contentsCss'])) {
+        $stylesheets = $settings['contentsCss'];
+      }
       break;
   }
   
