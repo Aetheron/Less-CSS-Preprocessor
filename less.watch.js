@@ -1,5 +1,6 @@
 ;(function ($) {
-
+  "use strict";
+  
   Drupal.behaviors.less = {
     attach: function (context, settings) {
       
@@ -47,16 +48,15 @@
                 
                 self.failed_requests = 0;
                 
-                for (i in response) {
-                  
-                  var old_file = response[i].old_file,
-                      new_file = response[i].new_file;
+                $.each(response, function (index, value) {
+                  var old_file = value.old_file,
+                      new_file = value.new_file;
                   
                   // Math.random() at the end forces a reload of the file.
                   $('head link[href^="' + old_file + '"]', context).replaceWith($('<link type="text/css" rel="stylesheet" media="all" />').attr('href', new_file + '?' + Math.random()));
                   
-                  watched_files[watched_files.indexOf(old_file)] = new_file;
-                }
+                  watched_files[$.inArray(old_file, watched_files)] = new_file;
+                });
               },
               
               // On failure, count failed request and increase interval.

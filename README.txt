@@ -1,4 +1,5 @@
 LESS CSS Preprocessor
+=====================
 
 Files in lessphp/ are from the library at http://leafo.net/lessphp/
 
