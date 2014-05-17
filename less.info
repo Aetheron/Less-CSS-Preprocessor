@@ -7,3 +7,5 @@ core = 7.x
 configure = admin/config/development/less
 
 dependencies[] = libraries
+
+files[] = class.lessjs.inc

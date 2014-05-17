@@ -11,9 +11,10 @@ function less_enable() {
 }
 
 /**
- * Implements hook_install().
+ * Implements hook_uninstall().
  */
 function less_uninstall() {
+  variable_del('less_engine');
   variable_del('less_devel');
   variable_del('less_dir');
   variable_del('less_watch');
@@ -28,16 +29,15 @@ function less_uninstall() {
 function less_requirements($phase) {
   $requirements = array();
   
-  module_load_include('module', 'less');
-  
-  $lessc_exists = function_exists('_less_inc') ? _less_inc() : FALSE;
-  
   switch ($phase) {
     case 'runtime':
+      
+      $lessc_exists = function_exists('_less_inc') ? _less_inc() : FALSE;
+  
       if ($lessc_exists) {
         $requirements['less_version'] = array(
           'title' => t('LESS'),
-          'value' => isset(lessc::$VERSION) ? preg_replace('/([^0-9\.-])+/i', '', lessc::$VERSION) : 'unknown',
+          'value' => '',//isset(lessc::$VERSION) ? preg_replace('/([^0-9\.-])+/i', '', lessc::$VERSION) : 'unknown',
           'description' => t('To check for newer versions of lessphp, go to <a href="!url" target="_blank">http://leafo.net/lessphp/</a>', array("!url" => url('http://leafo.net/lessphp/'))),
           'severity' => REQUIREMENT_OK,
         );

@@ -1,7 +1,11 @@
+/**
+ * @file
+ *   Contains JS required for less watch functionality.
+ */
 ;(function ($) {
   "use strict";
   
-  Drupal.behaviors.less = {
+  Drupal.behaviors.less_watch = {
     attach: function (context, settings) {
       
       var watched_files = [],

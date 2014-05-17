@@ -20,56 +20,36 @@ function less_settings_form($form, &$form_state) {
     '#value' => t('Flush LESS files'),
   );
   
-  $less_compiler_links = array(
-    '!less_php' => l('oyejorge/less.php', 'http://lessphp.gpeasy.com/'),
-    '!lessphp' => l('leafo/lessphp', 'http://leafo.net/lessphp/'),
-    '!less_js' => l('less/less.js', 'http://lesscss.org/'),
+  $less_engines = array(
+    libraries_detect('less.js'),
+    libraries_detect('less.php'),
+    libraries_detect('lessphp'),
   );
   
   $form['less_engine'] = array(
     '#type' => 'radios',
     '#title' => t('LESS engine'),
-    '#options' => array(
-      'less.php' => t('less.php - !less_php', $less_compiler_links),
-      'less.js' => t('less.js - !less_js', $less_compiler_links),
-      'lessphp' => t('lessphp - !lessphp', $less_compiler_links),
-    ),
+    '#options' => array(),
     '#required' => TRUE,
-    '#default_value' => variable_get('less_engine', NULL),
+    '#default_value' => variable_get('less_engine', 'lessphp'),
   );
   
-  _less_inc();
-  
-  /*
-   * Individual 'radio' elements to control disable state.
-   */
-  $form['less_engine']['less.php'] = array(
-    '#type' => 'radio',
-    '#title' => $form['less_engine']['#options']['less.php'],
-    '#return_value' => 'less.php',
-    '#description' => class_exists('Less_Version') ? check_plain(Less_Version::version) : '',
-  );
-  
-  $form['less_engine']['lessphp'] = array(
-    '#type' => 'radio',
-    '#title' => $form['less_engine']['#options']['lessphp'],
-    '#return_value' => 'lessphp',
-    '#description' => class_exists('lessc') ? check_plain(lessc::$VERSION) : '',
-  );
-  
-  $form['less_engine']['less.js'] = array(
-    '#type' => 'radio',
-    '#title' => $form['less_engine']['#options']['less.js'],
-    '#return_value' => 'less.js',
-    '#description' => check_plain(exec('lessc --version')),
-  );
-  
-  foreach (element_children($form['less_engine']) as $key) {
-    $form['less_engine'][$key]['#disabled'] = empty($form['less_engine'][$key]['#description']);
-  }
-  
-  if (empty($form['less_engine']['less.php']['#disabled'])) {
-    $form['less_engine']['lessphp']['#title'] .= t(' (compatibility mode through !less_php)', $less_compiler_links);
+  foreach ($less_engines as $less_engine) {
+    
+    $form['less_engine']['#options'][$less_engine['name']] = $less_engine['name'];
+    
+    $form['less_engine'][$less_engine['name']] = array(
+      '#type' => 'radio',
+      '#title' => t('@engine_name - !vendor_link', array('@engine_name' => $less_engine['name'], '!vendor_link' => l($less_engine['vendor url'], $less_engine['vendor url']))),
+      '#return_value' => $less_engine['name'],
+      '#description' => t('Missing - Click vendor link above to read installation instructions.'),
+      '#disabled' => !($less_engine['installed']),
+    );
+    
+    if ($less_engine['installed']) {
+      $form['less_engine'][$less_engine['name']]['#description'] = t('v%version Installed', array('%version' => $less_engine['version']));
+    }
+    
   }
   
   $form['less_devel'] = array(
