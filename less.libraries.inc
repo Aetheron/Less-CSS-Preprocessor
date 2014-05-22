@@ -201,7 +201,7 @@ function _less_libraries_determine_location(&$library, $locations, $version_file
  */
 function _less_lessjs_version() {
   
-  $lessjs_version = new lessjs(); // Should be autoloaded from definition in .info file.
+  $lessjs_version = new Lessjs(); // Should be autoloaded from definition in .info file.
   
   return preg_replace('/.*?([\d\.]+).*/', '$1', $lessjs_version->version());
 }

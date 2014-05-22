@@ -2,14 +2,13 @@
 
 /**
  * @file
- * 
- * Contains 'lessjs' class that acts as an abstraction layer for command line less.js.
+ * Contains 'lessjs' class; an abstraction layer for command line less.js.
  */
 
 /**
  * 'lessjs' class.
  */
-class lessjs {
+class Lessjs {
   
   // Base command is hardcoded here to reduce security vulnerability.
   private static $base_command = 'lessc';
@@ -70,7 +69,7 @@ class lessjs {
    * 
    * @link http://lesscss.org/usage/#command-line-usage-include-paths
    * 
-   * @param string $path
+   * @param string $include_path
    *   Path relative to getcwd().
    */
   public function include_path($include_path) {
@@ -83,7 +82,9 @@ class lessjs {
    * Add LESS variable that will be set with the '--global-var' argument.
    * 
    * @param string $variable_name
+   *   The variable name.
    * @param string $variable_value
+   *   The variable value.
    */
   public function global_var($variable_name, $variable_value) {
     
@@ -96,8 +97,10 @@ class lessjs {
    * @param bool $enabled
    *   Set the source maps flag.
    * @param string $rootpath
+   *   Value to be prepended to each source map URL.
    *   @link http://lesscss.org/usage/#command-line-usage-source-map-rootpath
    * @param string $basepath
+   *   Leading value to be stripped from each source map URL.
    *   @link http://lesscss.org/usage/#command-line-usage-source-map-basepath
    */
   public function source_maps($enabled, $rootpath = NULL, $basepath = NULL) {
@@ -133,7 +136,7 @@ class lessjs {
       $arguments[] = '--global-var=' . escapeshellarg($global_variable_name . '=' . $global_variable_value);
     }
     
-    // Set service map flags
+    // Set service map flags.
     if ($this->source_maps_enabled) {
       
       if (isset($this->source_map_rootpath)) {
@@ -150,7 +153,8 @@ class lessjs {
       $arguments[] = '--source-map-map-inline';
     }
     
-    // Input file should be last argument. @link http://lesscss.org/usage/#command-line-usage-command-line-usage
+    // Input file should be last argument.
+    // @link http://lesscss.org/usage/#command-line-usage-command-line-usage
     $arguments[] = $this->input_file;
     
     return $arguments;
@@ -197,18 +201,18 @@ class lessjs {
     
     $command = implode(' ', array_merge(array(self::$base_command), $command_arguments));
     
-    // Handles for data exchange
+    // Handles for data exchange.
     $pipes = array(
       0 => NULL, // STDIN
       1 => NULL, // STDOUT
       2 => NULL, // STDERR
     );
     
-    // Sets permissions on $pipes
+    // Sets permissions on $pipes.
     $descriptors = array(
-        0 => array('pipe', 'r'), // STDIN
-        1 => array('pipe', 'w'), // STDOUT
-        2 => array('pipe', 'w'), // STDERR
+      0 => array('pipe', 'r'), // STDIN
+      1 => array('pipe', 'w'), // STDOUT
+      2 => array('pipe', 'w'), // STDERR
     );
     
     $process = proc_open($command, $descriptors, $pipes);

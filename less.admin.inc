@@ -3,9 +3,11 @@
 /**
  * @file
  * Contains the administration pages for LESS.
- *
  */
 
+/**
+ * Form for LESS module settings.
+ */
 function less_settings_form($form, &$form_state) {
 
   $form['less_flush'] = array(
@@ -76,10 +78,18 @@ function less_settings_form($form, &$form_state) {
   return system_settings_form($form);
 }
 
+/**
+ * Form submission function.
+ * 
+ * Trigger clear of LESS module cache data.
+ */
 function less_settings_form_submit($form, &$form_state) {
   cache_clear_all('less:', 'cache', TRUE);
 }
 
+/**
+ * Submit handler for cache clear button.
+ */
 function _flush_less($form, &$form_state) {
 
   _less_get_dir(TRUE);

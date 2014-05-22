@@ -26,7 +26,7 @@ function _less_less_php($input_file, $less_settings) {
   
   $parser->SetImportDirs($import_dirs);
   
-  // Capture errors
+  // Try to capture errors.
   try {
     
     if ($less_settings['less_devel']) {

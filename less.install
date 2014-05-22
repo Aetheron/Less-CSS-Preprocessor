@@ -1,15 +1,10 @@
 <?php
+
 /**
  * @file
  * Install, update, and uninstall functions for the less module.
  */
  
-/**
- * Implements HOOK_enable().
- */
-function less_enable() {
-}
-
 /**
  * Implements hook_uninstall().
  */
@@ -22,12 +17,12 @@ function less_uninstall() {
 }
 
 /**
- * Implementation of hook_requirements().
- *
- * @param $phase The phase in which hook_requirements is run: install/runtime.
+ * Implements hook_requirements().
  */
 function less_requirements($phase) {
   $requirements = array();
+  
+  $t = get_t();
   
   switch ($phase) {
     case 'runtime':
@@ -39,32 +34,32 @@ function less_requirements($phase) {
         $loaded_engine = libraries_detect($less_engine_loaded);
         
         $requirements['less_version'] = array(
-          'title' => t('LESS'),
+          'title' => $t('LESS'),
           'value' => $loaded_engine['name'] . ' - v' . $loaded_engine['version'],
-          'description' => t('To check for newer versions go to <a href="@vendor_url">@vendor_url</a>.', array('@vendor_url' => $loaded_engine['vendor url'])),
+          'description' => $t('To check for newer versions go to <a href="@vendor_url" target="_blank">@vendor_url</a>.', array('@vendor_url' => $loaded_engine['vendor url'])),
           'severity' => REQUIREMENT_OK,
         );
       }
       else {
         $requirements['less_library'] = array(
-          'title' => 'LESS',
-          'description' => t('A LESS library was not detected. Please follow the instructions on the <a href="!url" target="_blank">LESS project page</a> to install the a LESS library.', array("!url" => url('https://drupal.org/project/less'))),
+          'title' => $t('LESS'),
+          'description' => $t('A LESS library was not detected. Please follow the instructions on the <a href="!url" target="_blank">LESS project page</a> to install the a LESS library.', array("!url" => url('https://drupal.org/project/less'))),
           'severity' => REQUIREMENT_ERROR,
         );
       }
       if (variable_get('less_devel', FALSE)) {
         $requirements['less_devel'] = array(
           'title' => 'LESS developer mode',
-          'value' => t('Enabled'),
-          'description' => t('LESS files are being regenerated on every request. Remember to <a href="!url">turn off</a> this feature on production websites.', array("!url" => url('admin/config/development/less'))),
+          'value' => $t('Enabled'),
+          'description' => $t('LESS files are being regenerated on every request. Remember to <a href="!url">turn off</a> this feature on production websites.', array("!url" => url('admin/config/development/less'))),
           'severity' => REQUIREMENT_WARNING,
         );
       }
       break;
+      
     default:
       break;
   }
   
   return $requirements;
 }
-

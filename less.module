@@ -64,7 +64,7 @@ function less_permission() {
  */
 function less_element_info_alter(&$type) {
   
-  // Prepend to the list of #pre_render functions so it runs first. 
+  // Prepend to the list of #pre_render functions so it runs first.
   array_unshift($type['styles']['#pre_render'], '_less_pre_render');
   
   if (variable_get('less_devel', FALSE)) {
@@ -86,7 +86,7 @@ function _less_attach_src($styles) {
       // Hashes are generated based on the URL without the query portion.
       $file_url_parts = drupal_parse_url($styles[$key]['#attributes']['href']);
       
-      //If we have a match, it means it is a compiled .less file.
+      // If we have a match, it means it is a compiled .less file.
       if ($cache = cache_get('less:watch:' . drupal_hash_base64($file_url_parts['path']))) {
         
         // Some inspectors allow 'src' attribute to open from a click.
@@ -99,7 +99,15 @@ function _less_attach_src($styles) {
 }
 
 /**
- * Processes .less files
+ * Pre-render function for 'style' elements.
+ * 
+ * Key place where .less files are detected and processed.
+ * 
+ * @param array $styles
+ *   All 'style' elements that are to display on the page.
+ * 
+ * @return array
+ *   Modified style elements pointing to compiled LESS output.
  */
 function _less_pre_render($styles) {
   
@@ -158,13 +166,11 @@ function less_admin_menu_cache_info() {
  * Implements hook_flush_caches().
  *
  * Flushes compiled LESS files during cache flush, except during cron.
- *
- * @return An array of cache table names.
  */
 function less_flush_caches() {
   if (!drupal_static('less_cron')) {
     
-    // rebuild the less files directory.
+    // Rebuild the less files directory.
     _less_get_dir(TRUE);
     cache_clear_all('less:', 'cache', TRUE);
   }
@@ -173,6 +179,12 @@ function less_flush_caches() {
 
 /**
  * Get/(re)generate current 'less_dir' variable.
+ * 
+ * @param bool $rebuild
+ *   Flag to rebuild compiled output.
+ * 
+ * @return string
+ *   current 'less_dir' Drupal variable value.
  */
 function _less_get_dir($rebuild = FALSE) {
   $less_dir = variable_get('less_dir');
@@ -181,7 +193,7 @@ function _less_get_dir($rebuild = FALSE) {
   // generate a new unique id and save it.
   if ($rebuild || empty($less_dir)) {
     
-    // Set the less directory variable
+    // Set the less directory variable.
     variable_set('less_dir', drupal_hash_base64(uniqid('', TRUE)));
   }
   
@@ -189,7 +201,7 @@ function _less_get_dir($rebuild = FALSE) {
 }
 
 /**
- * Finds and loads the lessphp library
+ * Loads the selected LESS engine, or 'lessphp' for legacy reasons.
  * 
  * @return bool
  *   TRUE if selected LESS engine is loaded.
@@ -216,9 +228,10 @@ function _less_inc() {
  * from web root. This is mainly used to ensure that compiled .less files still
  * reference images at their original paths.
  * 
- * @return string processed styles with replaced paths
+ * @return string
+ *   Processed styles with replaced paths.
  * 
- * @see drupal_build_css_cache().
+ * @see drupal_build_css_cache()
  */
 function _less_rewrite_paths($input_filepath, $contents) {
   $output = '';
@@ -241,6 +254,8 @@ function _less_rewrite_paths($input_filepath, $contents) {
 }
 
 /**
+ * Keeps track of .less file "ownership".
+ * 
  * This keeps track of which modules and themes own which .less files, and any
  * variable defaults those system items define.
  * 
@@ -313,12 +328,16 @@ function _less_registry() {
 }
 
 /**
+ * Returns .less file "owner".
+ * 
  * Returns the owning module/theme for a passed in .less file, or NULL.
  * Only can resolve .less files that are added using .info files.
  * 
- * @param $filepath
+ * @param string $filepath
+ *   System path to .less file, relative to DRUPAL_ROOT.
  * 
- * @return system name or NULL.
+ * @return string|NULL
+ *   System name of .less file "owner" or NULL in case of no known "owner".
  */
 function _less_file_owner($filepath) {
   // Use the advanced drupal_static() pattern, since this is called very often.
@@ -338,7 +357,7 @@ function _less_file_owner($filepath) {
 /**
  * Returns the compiled list of variables and functions for a module/theme.
  * 
- * @param $system_name
+ * @param string $system_name
  *   Module or theme system name.
  */
 function less_get_settings($system_name = NULL) {
@@ -370,7 +389,7 @@ function less_get_settings($system_name = NULL) {
     );
     
     
-    /**
+    /*
      * Compile the LESS variables.
      */
     // Cached default variables from .info files and hook_less_variables().
@@ -391,7 +410,7 @@ function less_get_settings($system_name = NULL) {
     drupal_alter('less_variables_' . $system_name, $data['variables']);
     
     
-    /**
+    /*
      * Grab the LESS functions.
      * 
      * LESS functions are not stored in the cache table since they could be
@@ -409,7 +428,7 @@ function less_get_settings($system_name = NULL) {
     drupal_alter('less_functions_' . $system_name, $data['functions']);
     
     
-    /**
+    /*
      * Grab the LESS include paths.
      * 
      */
@@ -443,7 +462,14 @@ function _less_token_replace($arg) {
 
 /**
  * Helper function that attempts to create a folder if it doesn't exist.
+ * 
  * Locks are used to help avoid concurrency collisions.
+ * 
+ * @param string $directory_path
+ *   Directory of which to create/confirm existence.
+ * 
+ * @return bool
+ *   Value indicating existence of directory.
  */
 function _less_ensure_directory($directory_path) {
   
@@ -483,19 +509,6 @@ function _less_ensure_directory($directory_path) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter() for 'system_theme_settings'.
- */
-// function less_form_system_theme_settings_alter(&$form, &$form_state) {
-//   
-  // module_load_include('inc', 'less', 'less.theme');
-//   
-  // $function = '_' . __FUNCTION__;
-//   
-  // return $function(&$form, &$form_state);
-//   
-// }
-
-/**
  * Implements hook_form_alter().
  * 
  * Includes files that have hook_form_FORM_ID_alter() implementations within.
@@ -508,6 +521,7 @@ function less_form_alter(&$form, &$form_state, $form_id) {
     case 'system_theme_settings':
       $group = 'theme';
       break;
+      
     case 'wysiwyg_profile_form':
       $group = 'wysiwyg';
       break;

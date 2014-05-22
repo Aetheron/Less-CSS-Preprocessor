@@ -2,7 +2,7 @@
 
 /**
  * @file
- *   Libraries integration file for 'lessphp' library.
+ * Libraries integration file for 'lessphp' library.
  */
 
 
@@ -33,12 +33,12 @@ function _less_lessphp($input_file, $less_settings) {
     $less->addImportDir(dirname($input_file));
   }
   
-  // Capture errors
+  // Try to capture errors.
   try {
     
     if ($less_settings['less_devel']) {
       
-      $less->setPreserveComments(true);
+      $less->setPreserveComments(TRUE);
       $cache = $less->cachedCompile($input_file);
       
       cache_set('less:devel:' . drupal_hash_base64($input_file), $cache['files']);

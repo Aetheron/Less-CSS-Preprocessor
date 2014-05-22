@@ -2,7 +2,7 @@
 
 /**
  * @file
- *   Libraries integration file for 'less.js' library.
+ * Libraries integration file for 'less.js' library.
  */
 
 
@@ -11,7 +11,7 @@
  */
 function _less_lessjs($input_file, $less_settings) {
   
-  $lessjs = new lessjs($input_file);
+  $lessjs = new Lessjs($input_file);
   
   foreach ($less_settings['variables'] as $var_name => $var_value) {
     $lessjs->global_var(trim($var_name, '@'), trim($var_value, ';'));
@@ -40,7 +40,7 @@ function _less_lessjs($input_file, $less_settings) {
   }
   
   return array(
-    $lessjs->compile(), // output
-    $lessjs->get_error(), // error
+    $lessjs->compile(),
+    $lessjs->get_error(),
   );
 }
