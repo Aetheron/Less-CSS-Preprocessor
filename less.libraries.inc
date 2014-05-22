@@ -11,6 +11,9 @@
 function less_libraries_info() {
   $libraries = array();
   
+  /**
+   * Legacy leafo/lessphp library.
+   */
   $libraries['lessphp'] = array(
     'name' => 'lessphp (Not recommended)',
     'vendor url' => 'http://leafo.net/lessphp/', 
@@ -25,10 +28,20 @@ function less_libraries_info() {
         'lessc.inc.php',
       ),
     ),
+    'integration files' => array(
+      'less' => array(
+        'php' => array(
+          'engines/less.lessphp.inc',
+        ),
+      ),
+    ),
   );
   
   _less_lessphp_locate($libraries['lessphp']);
   
+  /**
+   * Newer oyejorge/less.php library. Closer to canonical spec from lesscss.org.
+   */
   $libraries['less.php'] = array(
     'name' => 'less.php',
     'vendor url' => 'http://lessphp.gpeasy.com/', 
@@ -43,6 +56,13 @@ function less_libraries_info() {
         'Less.php',
       ),
     ),
+    'integration files' => array(
+      'less' => array(
+        'php' => array(
+          'engines/less.less_php.inc',
+        ),
+      ),
+    ),
     'versions' => array(
       '1.7.0' => array(),
     ),
@@ -50,6 +70,9 @@ function less_libraries_info() {
   
   _less_less_php_locate($libraries['less.php']);
   
+  /**
+   * Mainline version of LESS language.
+   */
   $libraries['less.js'] = array(
     'name' => 'less.js',
     'vendor url' => 'http://lesscss.org/', 
@@ -58,7 +81,14 @@ function less_libraries_info() {
     'version callback' => '_less_lessjs_version',
     'files' => array(
       'php' => array(
-        'less.class.inc',
+        'class.lessjs.inc',
+      ),
+    ),
+    'integration files' => array(
+      'less' => array(
+        'php' => array(
+          'engines/less.less_js.inc',
+        ),
       ),
     ),
     'versions' => array(
@@ -79,14 +109,18 @@ function _less_less_php_locate(&$library) {
   
   $locations = array();
   
+  // Primary libraries location
   $locations[] = libraries_get_path('less.php');
+  
+  // lessphp drop-in replacement location
   $locations[] = libraries_get_path('lessphp');
   
+  // Composer location
   $locations[] = drupal_get_path('module', 'less') . '/vendor/oyejorge/less.php';
   
   $version_files = array(
-    'lib/Less/Version.php' => 'lessc.inc.php',
-    'Version.php' => 'Less.php',
+    'lib/Less/Version.php' => 'lessc.inc.php', // Source code
+    'Version.php' => 'Less.php', // Compiled
   );
   
   _less_libraries_determine_location($library, $locations, $version_files);
@@ -103,11 +137,19 @@ function _less_lessphp_locate(&$library) {
   
   $locations = array();
   
+  // Primary libraries location
   $locations[] = libraries_get_path('lessphp');
   
+  // Legacy bundled location
   $locations[] = drupal_get_path('module', 'less') . '/lessphp';
+  
+  // Composer location
   $locations[] = drupal_get_path('module', 'less') . '/vendor/leafo/lessphp';
   
+  /*
+   * oyejorge/less.php does not have the actual version number in lessc.inc.php,
+   * so we don't have to worry about mistaken identity.
+   */
   $version_files = array(
     'lessc.inc.php' => 'lessc.inc.php',
   );
@@ -115,6 +157,18 @@ function _less_lessphp_locate(&$library) {
   _less_libraries_determine_location($library, $locations, $version_files);
 }
 
+/**
+ * Helper function that checks locations for LESS libraries.
+ * 
+ * @param array &$library
+ *   Library in question. Paths to found libraries will be added here.
+ * @param array $locations
+ *   Array of paths of potential library installs relative to DRUPAL_ROOT.
+ * @param array $version_files
+ *   Array of key => value pairs, where key is location library version number,
+ *   and value is the location of that file that to be included when this
+ *   library is loaded with libraries_load().
+ */
 function _less_libraries_determine_location(&$library, $locations, $version_files) {
   
   foreach ($locations as $location) {
@@ -133,16 +187,21 @@ function _less_libraries_determine_location(&$library, $locations, $version_file
           
           $library['version arguments']['file'] = $version_file;
           
-          break(2);
+          break 2; // File has been found, skip remaining $locations and $version_files
         }
       }
     }
   }
 }
 
+/**
+ * 'version callback' for library 'less.js'.
+ * 
+ * @return string 
+ */
 function _less_lessjs_version() {
   
-  $lessjs_version = new lessjs();
+  $lessjs_version = new lessjs(); // Should be autoloaded from definition in .info file.
   
   return preg_replace('/.*?([\d\.]+).*/', '$1', $lessjs_version->version());
 }

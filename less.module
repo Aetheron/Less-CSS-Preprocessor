@@ -116,17 +116,16 @@ function _less_pre_render($styles) {
     if (user_access(LESS_PERMISSION) && flood_is_allowed('less_devel_warning', 1)) {
       flood_register_event('less_devel_warning');
       
-      $message = 'LESS files are being checked for modifications on every request. Remember to <a href="@url">turn off</a> this feature on production websites.';
       $message_vars = array("@url" => url('admin/config/development/less'));
-      drupal_set_message(t($message, $message_vars), 'status');
+      drupal_set_message(t('LESS files are being checked for modifications on every request. Remember to <a href="@url">turn off</a> this feature on production websites.', $message_vars), 'status');
     }
   }
   
   $less_path = 'public://less/' . $less_dir;
   
   foreach ($styles['#items'] as $key => &$info) {
-    $input_file = $info['data'];
-    if (drupal_substr($input_file, -5) == '.less') {
+    
+    if (drupal_substr($info['data'], -5) == '.less') {
       
       require_once dirname(__FILE__) . '/less.process.inc';
       
@@ -202,12 +201,12 @@ function _less_inc() {
     
     $less_engine = variable_get('less_engine', 'lessphp');
     
-    // Check library defined locations and attempt to load.
-    
-    $loaded = (($less_engine_library = libraries_load($less_engine)) && $less_engine_library['installed']);
+    if (($less_engine_library = libraries_load($less_engine)) && $less_engine_library['installed']) {
+      $loaded = $less_engine;
+    }
   }
   
-  return (bool) $loaded;
+  return $loaded;
 }
 
 /**
@@ -469,13 +468,12 @@ function _less_ensure_directory($directory_path) {
     
     if (!$is_dir) {
       // There is a problem with the directory.
-      $message = 'LESS could not create a directory in %dir';
       $message_vars = array('%dir' => $directory_path);
       
-      watchdog('LESS', $message, $message_vars, WATCHDOG_ERROR);
+      watchdog('LESS', 'LESS could not create a directory in %dir', $message_vars, WATCHDOG_ERROR);
       
       if (user_access(LESS_PERMISSION)) {
-        drupal_set_message(t($message, $message_vars), 'error', FALSE);
+        drupal_set_message(t('LESS could not create a directory in %dir', $message_vars), 'error', FALSE);
       }
       
     }

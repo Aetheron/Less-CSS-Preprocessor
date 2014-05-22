@@ -40,7 +40,7 @@ function less_settings_form($form, &$form_state) {
     
     $form['less_engine'][$less_engine['name']] = array(
       '#type' => 'radio',
-      '#title' => t('@engine_name - !vendor_link', array('@engine_name' => $less_engine['name'], '!vendor_link' => l($less_engine['vendor url'], $less_engine['vendor url']))),
+      '#title' => t('@engine_name - <a href="@vendor_url">@vendor_url</a>', array('@engine_name' => $less_engine['name'], '@vendor_url' => $less_engine['vendor url'])),
       '#return_value' => $less_engine['name'],
       '#description' => t('Missing - Click vendor link above to read installation instructions.'),
       '#disabled' => !($less_engine['installed']),

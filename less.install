@@ -32,14 +32,24 @@ function less_requirements($phase) {
   switch ($phase) {
     case 'runtime':
       
-      $lessc_exists = function_exists('_less_inc') ? _less_inc() : FALSE;
+      $less_engine_loaded = _less_inc();
   
-      if ($lessc_exists) {
+      if (!empty($less_engine_loaded)) {
+        
+        $loaded_engine = libraries_detect($less_engine_loaded);
+        
         $requirements['less_version'] = array(
           'title' => t('LESS'),
-          'value' => '',//isset(lessc::$VERSION) ? preg_replace('/([^0-9\.-])+/i', '', lessc::$VERSION) : 'unknown',
-          'description' => t('To check for newer versions of lessphp, go to <a href="!url" target="_blank">http://leafo.net/lessphp/</a>', array("!url" => url('http://leafo.net/lessphp/'))),
+          'value' => $loaded_engine['name'] . ' - v' . $loaded_engine['version'],
+          'description' => t('To check for newer versions go to <a href="@vendor_url">@vendor_url</a>.', array('@vendor_url' => $loaded_engine['vendor url'])),
           'severity' => REQUIREMENT_OK,
+        );
+      }
+      else {
+        $requirements['less_library'] = array(
+          'title' => 'LESS',
+          'description' => t('A LESS library was not detected. Please follow the instructions on the <a href="!url" target="_blank">LESS project page</a> to install the a LESS library.', array("!url" => url('https://drupal.org/project/less'))),
+          'severity' => REQUIREMENT_ERROR,
         );
       }
       if (variable_get('less_devel', FALSE)) {
@@ -48,13 +58,6 @@ function less_requirements($phase) {
           'value' => t('Enabled'),
           'description' => t('LESS files are being regenerated on every request. Remember to <a href="!url">turn off</a> this feature on production websites.', array("!url" => url('admin/config/development/less'))),
           'severity' => REQUIREMENT_WARNING,
-        );
-      }
-      if (!$lessc_exists) {
-        $requirements['less_library'] = array(
-          'title' => 'LESS',
-          'description' => t('The lessphp library was not detected. Please follow the instructions on the <a href="!url" target="_blank">LESS project page</a> to install the lessphp library.', array("!url" => url('http://drupal.org/project/less'))),
-          'severity' => REQUIREMENT_ERROR,
         );
       }
       break;

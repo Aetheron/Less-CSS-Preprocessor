@@ -20,7 +20,7 @@ function _less_process_file(&$info) {
   // Ensure the destination directory exists.
   if (!_less_ensure_directory($css_path)) {
     // Cancel the for each loop when directory doesn't exist.
-    break;
+    return;
   }
 
   $output_file = $css_path . '/' . basename($input_file, '.less');
@@ -91,13 +91,12 @@ function _less_process_file(&$info) {
     
     if ($error) {
       
-      $message = 'LESS error: @message, %input_file';
       $message_vars = array('@message' => $error, '%input_file' => $input_file);
       
-      watchdog('LESS', $message, $message_vars, WATCHDOG_ERROR);
+      watchdog('LESS', 'LESS error: @message, %input_file', $message_vars, WATCHDOG_ERROR);
       
       if (user_access(LESS_PERMISSION)) {
-        drupal_set_message(t($message, $message_vars), 'error');
+        drupal_set_message(t('LESS error: @message, %input_file', $message_vars), 'error');
       }
     }
     
@@ -131,147 +130,4 @@ function _less_process_file(&$info) {
     }
   }
 
-}
-
-
-
-/**
- * Processes files using oyejorge/less.php
- */
-function _less_less_php($input_file, $less_settings) {
-  
-  $output_data = NULL;
-  $error = NULL;
-  
-  $parser = new Less_Parser();
-  
-  $parser->ModifyVars($less_settings['variables']);
-  
-  $import_dirs = array();
-  
-  foreach ($less_settings['paths'] as $path) {
-    $import_dirs[$path] = '';
-  }
-  
-  $parser->SetImportDirs($import_dirs);
-  
-  // Capture errors
-  try {
-    
-    if ($less_settings['less_devel']) {
-      
-      $parsed_files = Less_Parser::AllParsedFiles();
-      
-      $file_times = array();
-      
-      foreach ($parsed_files as $parsed_file) {
-        $file_times[realpath($parsed_file)] = filemtime($parsed_file);
-      }
-      
-      cache_set('less:devel:' . drupal_hash_base64($input_file), $file_times);
-      
-      $parser->SetOption('sourceMap', TRUE);
-      // $parser->SetOption('outputSourceFiles', TRUE); // Might not need this.
-      $parser->SetOption('sourceMapRootpath', '/'); // @link https://github.com/oyejorge/less.php/issues/127
-      $parser->SetOption('sourceMapBasepath', DRUPAL_ROOT); // @link https://github.com/oyejorge/less.php/issues/127
-    }
-
-    $parser->parseFile(realpath($input_file));
-    
-    $output_data = $parser->getCss();
-  }
-  catch (Exception $e) {
-    
-    $error = $e->getMessage();
-  }
-  
-  return array($output_data, $error);
-}
-
-/**
- * Process files using leafo/lessphp
- */
-function _less_lessphp($input_file, $less_settings) {
-  
-  $output_data = NULL;
-  $error = NULL;
-  
-  $less = new lessc();
-  
-  if (method_exists($less, 'registerFunction') && is_array($less_settings['functions'])) {
-    foreach ($less_settings['functions'] as $funcion => $callback) {
-      $less->registerFunction($funcion, $callback);
-    }
-  }
-  
-  if (method_exists($less, 'setVariables')) {
-    $less->setVariables($less_settings['variables']);
-  }
-  
-  // LESS variables compatibility for less.php alternate library.
-  if (class_exists('Less_Version')) {
-    
-    // Make so imports work from original file directory.
-    $less->addImportDir(dirname($input_file));
-  }
-  
-  // Capture errors
-  try {
-    
-    if ($less_settings['less_devel']) {
-      
-      $less->setPreserveComments(true);
-      $cache = $less->cachedCompile($input_file);
-      
-      cache_set('less:devel:' . drupal_hash_base64($input_file), $cache['files']);
-      
-      $output_data = $cache['compiled'];
-    }
-    else {
-      
-      $output_data = $less->compileFile($input_file);
-    }
-  }
-  catch (Exception $e) {
-    
-    $error = $e->getMessage();
-  }
-  
-  return array($output_data, $error);
-}
-
-function _less_lessjs($input_file, $less_settings) {
-  
-  $lessjs = new lessjs($input_file);
-  
-  foreach ($less_settings['variables'] as $var_name => $var_value) {
-    $lessjs->global_var(trim($var_name, '@'), trim($var_value, ';'));
-  }
-  
-  foreach ($less_settings['paths'] as $include_path) {
-    $lessjs->include_path($include_path);
-  }
-  
-  if ($less_settings['less_devel']) {
-    
-    $lessjs->source_maps(TRUE, $GLOBALS['base_path'], DRUPAL_ROOT);
-    
-    $watched_files = $lessjs->depends();
-    
-    // Add $input_file to watch list as it is not in return from '--depends'.
-    array_unshift($watched_files, realpath($input_file));
-    
-    $watched_files_cache = array();
-    
-    foreach ($watched_files as $watched_file) {
-      $watched_files_cache[$watched_file] = filemtime($watched_file);
-    }
-    
-    cache_set('less:devel:' . drupal_hash_base64($input_file), $watched_files_cache);
-  }
-  
-  return array(
-    $lessjs->compile(),
-    $lessjs->get_error(),
-  );
 }
