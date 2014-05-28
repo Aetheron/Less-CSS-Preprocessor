@@ -35,6 +35,8 @@ function _less_process_file(&$info) {
     $less_settings = drupal_array_merge_deep($less_settings, (array) $info['less']);
   }
   
+  $less_settings['paths'] = array_unique($less_settings['paths']);
+  
   $less_settings['less_devel'] = $less_devel;
   
   // array_multisort() the data so that the hash returns the same hash regardless order of data.
@@ -69,12 +71,12 @@ function _less_process_file(&$info) {
   }
   
   // $output_file doesn't exist or is flagged for rebuild.
-  if ((!is_file($output_file) || $rebuild) && _less_inc()) {
+  if (!is_file($output_file) || $rebuild) {
     
     $output_data = NULL;
     $error = NULL;
     
-    switch (variable_get('less_engine', 'lessphp')) {
+    switch (_less_inc()) {
       case 'less.php':
         list($output_data, $error) = _less_less_php($input_file, $less_settings);
         break;
@@ -117,11 +119,14 @@ function _less_process_file(&$info) {
     
     if ($less_devel) {
       
+      global $theme;
+      
       $less_watch_cache = $info;
       
       $less_watch_cache['less'] = $less_settings;
       $less_watch_cache['data'] = $input_file;
       $less_watch_cache['output_file'] = $output_file;
+      $less_watch_cache['theme'] = $theme;
 
       cache_set('less:watch:' . drupal_hash_base64(file_create_url($output_file)), $less_watch_cache);
       
@@ -130,4 +135,28 @@ function _less_process_file(&$info) {
     }
   }
 
+}
+
+/**
+ * Normalize keeping track of changed files.
+ * 
+ * @param string $input_file
+ *   Path of source file.
+ * @param array $dependencies
+ *   Array of files that are @import'ed in $input_file, recursively.
+ */
+function _less_cache_dependencies($input_file, $dependencies = array()) {
+  
+  // Add $input_file to $dependencies as it is not in return from engines.
+  $dependencies = array_merge(array($input_file), (array) $dependencies);
+  
+  $watched_files = array();
+  
+  foreach ($dependencies as $dependency) {
+    
+    // Full path on file should enforce uniqueness in associative array.
+    $watched_files[realpath($dependency)] = filemtime($dependency);
+  }
+  
+  cache_set('less:devel:' . drupal_hash_base64($input_file), $watched_files);
 }

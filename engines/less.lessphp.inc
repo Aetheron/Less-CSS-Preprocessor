@@ -26,6 +26,7 @@ function _less_lessphp($input_file, $less_settings) {
     $less->setVariables($less_settings['variables']);
   }
   
+  // @TODO fix this, this should be working with legacy library; import paths
   // LESS variables compatibility for less.php alternate library.
   if (class_exists('Less_Version')) {
     
@@ -41,7 +42,7 @@ function _less_lessphp($input_file, $less_settings) {
       $less->setPreserveComments(TRUE);
       $cache = $less->cachedCompile($input_file);
       
-      cache_set('less:devel:' . drupal_hash_base64($input_file), $cache['files']);
+      _less_cache_dependencies($input_file, $cache['files']);
       
       $output_data = $cache['compiled'];
     }

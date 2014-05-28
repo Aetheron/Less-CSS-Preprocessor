@@ -68,6 +68,7 @@ function less_element_info_alter(&$type) {
   array_unshift($type['styles']['#pre_render'], '_less_pre_render');
   
   if (variable_get('less_devel', FALSE)) {
+    
     // Must run after drupal_pre_render_styles() to attach any attributes.
     array_push($type['styles']['#pre_render'], '_less_attach_src');
   }
@@ -443,6 +444,7 @@ function less_get_settings($system_name = NULL) {
     // Invoke hook_less_functions_system_name_alter().
     drupal_alter('less_paths_' . $system_name, $data['paths']);
     
+    $data['paths'] = array_unique($data['paths']);
     
     $less_settings_static[$system_name] = $data;
   }

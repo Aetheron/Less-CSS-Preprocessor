@@ -14,7 +14,7 @@
       $watched_links = $('head link[src$=".less"]', context).each(function () {
         
         // Only grab the portion of the url up to, but not including, the '?'.
-        watched_files.push($(this).attr('href').match(/^([^\?]+)/)[1]);
+        watched_files.push($(this).attr('href'));
       });
       
       if (watched_files.length > 0) {

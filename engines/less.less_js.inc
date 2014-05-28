@@ -25,18 +25,9 @@ function _less_lessjs($input_file, $less_settings) {
     
     $lessjs->source_maps(TRUE, $GLOBALS['base_path'], DRUPAL_ROOT);
     
-    $watched_files = $lessjs->depends();
+    $dependencies = $lessjs->depends();
     
-    // Add $input_file to watch list as it is not in return from '--depends'.
-    array_unshift($watched_files, realpath($input_file));
-    
-    $watched_files_cache = array();
-    
-    foreach ($watched_files as $watched_file) {
-      $watched_files_cache[$watched_file] = filemtime($watched_file);
-    }
-    
-    cache_set('less:devel:' . drupal_hash_base64($input_file), $watched_files_cache);
+    _less_cache_dependencies($input_file, $dependencies);
   }
   
   return array(
