@@ -2,6 +2,8 @@
 name = "LESS CSS Preprocessor"
 description = "Allows themes or modules to use LESS files."
 
+php = 5.3
+
 core = 7.x
 
 configure = admin/config/development/less
