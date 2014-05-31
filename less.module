@@ -132,16 +132,11 @@ function _less_pre_render($styles) {
   
   $less_path = 'public://less/' . $less_dir;
   
-  foreach ($styles['#items'] as $key => &$info) {
+  foreach (_less_children($styles['#items']) as $less_filepath) {
     
-    if (drupal_substr($info['data'], -5) == '.less') {
-      
-      require_once dirname(__FILE__) . '/less.process.inc';
-      
-      _less_process_file($info);
-
-    }
-
+    require_once dirname(__FILE__) . '/less.process.inc';
+    
+    _less_process_file($styles['#items'][$less_filepath]);
   }
   
   return $styles;
@@ -532,4 +527,33 @@ function less_form_alter(&$form, &$form_state, $form_id) {
   if (isset($group)) {
     module_load_include('inc', 'less', 'less.' . $group);
   }
+}
+
+/**
+ * Return keys from array that match '.less' file extension.
+ * 
+ * @param array $items
+ *   An array where keys are expected to be filepaths.
+ * 
+ * @return array
+ *   Array of matching filepaths.
+ */
+function _less_children($items) {
+  
+  return array_filter(array_keys($items), '_less_is_less_filename');
+  
+}
+
+/**
+ * Check if filename has '.less' extension.
+ * 
+ * @param string $filename
+ *   File name/path to search for '.less' extension.
+ * 
+ * @return bool
+ *   TRUE if $filename does end with '.less'.
+ */
+function _less_is_less_filename($filename) {
+  
+  return drupal_substr($filename, -5) === '.less';
 }
