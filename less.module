@@ -10,9 +10,14 @@
 
 define('LESS_PERMISSION', 'administer less');
 
+define('LESS_DEVEL', 'less_devel');
+define('LESS_WATCH', 'less_watch');
+define('LESS_SOURCE_MAPS', 'less_source_maps');
+
 require_once dirname(__FILE__) . '/less.libraries.inc';
 require_once dirname(__FILE__) . '/less.cron.inc';
 require_once dirname(__FILE__) . '/less.wysiwyg.inc';
+require_once dirname(__FILE__) . '/less.theme.inc';
 
 /**
  * Implements hook_menu().
@@ -21,7 +26,7 @@ function less_menu() {
   $items = array();
 
   $items['admin/config/development/less'] = array(
-    'title' => 'LESS settings',
+    'title' => 'LESS',
     'description' => 'Administer LESS settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('less_settings_form'),
@@ -31,7 +36,7 @@ function less_menu() {
   );
 
   $items['admin/config/development/less/settings'] = array(
-    'title' => $items['admin/config/development/less']['title'],
+    'title' => 'LESS Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
@@ -67,7 +72,7 @@ function less_element_info_alter(&$type) {
   // Prepend to the list of #pre_render functions so it runs first.
   array_unshift($type['styles']['#pre_render'], '_less_pre_render');
   
-  if (variable_get('less_devel', FALSE)) {
+  if (variable_get(LESS_DEVEL, FALSE)) {
     
     // Must run after drupal_pre_render_styles() to attach any attributes.
     array_push($type['styles']['#pre_render'], '_less_attach_src');
@@ -91,7 +96,7 @@ function _less_attach_src($styles) {
       if ($cache = cache_get('less:watch:' . drupal_hash_base64($file_url_parts['path']))) {
         
         // Some inspectors allow 'src' attribute to open from a click.
-        $styles[$key]['#attributes']['src'] = url($cache->data['data']);
+        $styles[$key]['#attributes']['src'] = url($cache->data['less']['input_file']);
       }
     }
   }
@@ -112,12 +117,12 @@ function _less_attach_src($styles) {
  */
 function _less_pre_render($styles) {
   
-  $less_devel = variable_get('less_devel', FALSE);
+  $less_devel = variable_get(LESS_DEVEL, FALSE);
   $less_dir = _less_get_dir();
   
   if ($less_devel) {
     
-    if (variable_get('less_watch', TRUE)) {
+    if (variable_get(LESS_WATCH, FALSE)) {
       drupal_add_js(drupal_get_path('module', 'less') . '/less.watch.js');
     }
     
@@ -130,13 +135,46 @@ function _less_pre_render($styles) {
     }
   }
   
-  $less_path = 'public://less/' . $less_dir;
+  $less_file_keys = _less_children($styles['#items']);
   
-  foreach (_less_children($styles['#items']) as $less_filepath) {
+  if (!empty($less_file_keys)) {
     
     require_once dirname(__FILE__) . '/less.process.inc';
     
-    _less_process_file($styles['#items'][$less_filepath]);
+    // Attach settings to each item.
+    foreach ($less_file_keys as $less_filepath) {
+      
+      _less_attach_settings($styles['#items'][$less_filepath]);
+    }
+    
+    // Determine output path for each item.
+    foreach ($less_file_keys as $less_filepath) {
+      
+      _less_output_path($styles['#items'][$less_filepath]);
+    }
+    
+    // Check for rebuild each page
+    if ($less_devel) {
+      
+      foreach ($less_file_keys as $less_filepath) {
+        
+        _less_check_build($styles['#items'][$less_filepath]);
+      }
+    }
+    
+    foreach ($less_file_keys as $less_filepath) {
+      
+      _less_process_file($styles['#items'][$less_filepath]);
+    }
+    
+    // Store cache information.
+    if ($less_devel) {
+      
+      foreach ($less_file_keys as $less_filepath) {
+        
+        _less_store_cache_info($styles['#items'][$less_filepath]);
+      }
+    }
   }
   
   return $styles;
@@ -354,15 +392,17 @@ function _less_file_owner($filepath) {
  * Returns the compiled list of variables and functions for a module/theme.
  * 
  * @param string $system_name
- *   Module or theme system name.
+ *   Module/theme system name. NULL is cast to empty string for array indexes.
  */
 function less_get_settings($system_name = NULL) {
+  
   // Use the advanced drupal_static() pattern, since this is called very often.
   static $drupal_static_fast;
   if (!isset($drupal_static_fast)) {
     $drupal_static_fast['cache'] = &drupal_static(__FUNCTION__);
   }
   $less_settings_static = &$drupal_static_fast['cache'];
+  
   
   if (!isset($less_settings_static[$system_name])) {
     
@@ -376,12 +416,16 @@ function less_get_settings($system_name = NULL) {
       _less_registry();
     }
     
+    // Defaults.
     $data = array(
       'variables' => array(),
       'functions' => array(
         'token' => '_less_token_replace',
       ),
       'paths' => array(),
+      LESS_DEVEL => (bool) variable_get(LESS_DEVEL, FALSE),
+      LESS_SOURCE_MAPS => (bool) variable_get(LESS_SOURCE_MAPS, FALSE),
+      'theme' => $theme,
     );
     
     

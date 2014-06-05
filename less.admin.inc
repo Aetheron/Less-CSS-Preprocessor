@@ -54,21 +54,33 @@ function less_settings_form($form, &$form_state) {
     
   }
   
-  $form['less_devel'] = array(
+  $form[LESS_DEVEL] = array(
     '#type' => 'checkbox',
     '#title' => t('LESS developer mode'),
     '#description' => t('Enable developer mode to ensure LESS files are regenerated every page load.'),
-    '#default_value' => variable_get('less_devel', FALSE),
+    '#default_value' => variable_get(LESS_DEVEL, FALSE),
   );
   
-  $form['less_watch'] = array(
+  $form[LESS_SOURCE_MAPS] = array(
     '#type' => 'checkbox',
-    '#title' => t('LESS watch mode'),
+    '#title' => t('Source Maps'),
     '#description' => t('Enable watch mode while developer mode is active to automatically reload styles when changes are detected, including changes to @import-ed files. Does not cause a page reload.'),
-    '#default_value' => variable_get('less_watch', TRUE),
+    '#default_value' => variable_get(LESS_SOURCE_MAPS, FALSE),
     '#states' => array(
       'enabled' => array(
-        ':input[name="less_devel"]' => array('checked' => TRUE),
+        ':input[name="' . LESS_DEVEL . '"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  
+  $form[LESS_WATCH] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Watch Mode'),
+    '#description' => t('Enable watch mode while developer mode is active to automatically reload styles when changes are detected, including changes to @import-ed files. Does not cause a page reload.'),
+    '#default_value' => variable_get(LESS_WATCH, FALSE),
+    '#states' => array(
+      'enabled' => array(
+        ':input[name="' . LESS_DEVEL . '"]' => array('checked' => TRUE),
       ),
     ),
   );

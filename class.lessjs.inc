@@ -88,7 +88,7 @@ class Lessjs {
    */
   public function global_var($variable_name, $variable_value) {
     
-    $global_variables[$variable_name] = $variable_value;
+    $this->global_variables[$variable_name] = $variable_value;
   }
   
   /**

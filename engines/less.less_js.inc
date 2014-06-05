@@ -9,9 +9,9 @@
 /**
  * Process files using 'less/less.js'.
  */
-function _less_lessjs($input_file, $less_settings) {
+function _less_lessjs($less_settings) {
   
-  $lessjs = new Lessjs($input_file);
+  $lessjs = new Lessjs($less_settings['input_file']);
   
   foreach ($less_settings['variables'] as $var_name => $var_value) {
     $lessjs->global_var(trim($var_name, '@'), trim($var_value, ';'));
@@ -21,13 +21,16 @@ function _less_lessjs($input_file, $less_settings) {
     $lessjs->include_path($include_path);
   }
   
-  if ($less_settings['less_devel']) {
+  if ($less_settings[LESS_DEVEL]) {
     
-    $lessjs->source_maps(TRUE, $GLOBALS['base_path'], DRUPAL_ROOT);
+    if ($less_settings[LESS_SOURCE_MAPS]) {
+      
+      $lessjs->source_maps(TRUE, $GLOBALS['base_path'], DRUPAL_ROOT);
+    }
     
     $dependencies = $lessjs->depends();
     
-    _less_cache_dependencies($input_file, $dependencies);
+    _less_cache_dependencies($less_settings['input_file'], $dependencies);
   }
   
   return array(

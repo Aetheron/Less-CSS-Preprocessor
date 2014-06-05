@@ -9,10 +9,15 @@
  * Implements hook_uninstall().
  */
 function less_uninstall() {
+  
   variable_del('less_engine');
-  variable_del('less_devel');
+  
+  variable_del(LESS_DEVEL);
+  variable_del(LESS_WATCH);
+  variable_del(LESS_SOURCE_MAPS);
+  
   variable_del('less_dir');
-  variable_del('less_watch');
+  
   cache_clear_all('less:', 'cache', TRUE);
 }
 
@@ -47,8 +52,8 @@ function less_requirements($phase) {
           'severity' => REQUIREMENT_ERROR,
         );
       }
-      if (variable_get('less_devel', FALSE)) {
-        $requirements['less_devel'] = array(
+      if (variable_get(LESS_DEVEL, FALSE)) {
+        $requirements[LESS_DEVEL] = array(
           'title' => 'LESS developer mode',
           'value' => $t('Enabled'),
           'description' => $t('LESS files are being regenerated on every request. Remember to <a href="!url">turn off</a> this feature on production websites.', array("!url" => url('admin/config/development/less'))),

@@ -9,7 +9,9 @@
 /**
  * Process files using 'leafo/lessphp'.
  */
-function _less_lessphp($input_file, $less_settings) {
+function _less_lessphp($less_settings) {
+  
+  $input_file = $less_settings['input_file'];
   
   $output_data = NULL;
   $error = NULL;
@@ -26,18 +28,17 @@ function _less_lessphp($input_file, $less_settings) {
     $less->setVariables($less_settings['variables']);
   }
   
-  // @TODO fix this, this should be working with legacy library; import paths
-  // LESS variables compatibility for less.php alternate library.
-  if (class_exists('Less_Version')) {
+  if (method_exists($less, 'addImportDir')) {
     
-    // Make so imports work from original file directory.
-    $less->addImportDir(dirname($input_file));
+    foreach ($less_settings['paths'] as $import_dir) {
+      $less->addImportDir($import_dir);
+    }
   }
   
   // Try to capture errors.
   try {
     
-    if ($less_settings['less_devel']) {
+    if ($less_settings[LESS_DEVEL]) {
       
       $less->setPreserveComments(TRUE);
       $cache = $less->cachedCompile($input_file);

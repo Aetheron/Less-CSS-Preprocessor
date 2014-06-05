@@ -9,7 +9,9 @@
 /**
  * Processes files using 'oyejorge/less.php'.
  */
-function _less_less_php($input_file, $less_settings) {
+function _less_less_php($less_settings) {
+  
+  $input_file = $less_settings['input_file'];
   
   $output_data = NULL;
   $error = NULL;
@@ -30,12 +32,14 @@ function _less_less_php($input_file, $less_settings) {
   // Try to capture errors.
   try {
     
-    if ($less_settings['less_devel']) {
+    if ($less_settings[LESS_DEVEL]) {
       
-      $parser->SetOption('sourceMap', TRUE);
-      // $parser->SetOption('outputSourceFiles', TRUE); // Might not need this.
-      $parser->SetOption('sourceMapRootpath', '/'); // @link https://github.com/oyejorge/less.php/issues/127
-      $parser->SetOption('sourceMapBasepath', DRUPAL_ROOT); // @link https://github.com/oyejorge/less.php/issues/127
+      if ($less_settings[LESS_SOURCE_MAPS]) {
+        
+        $parser->SetOption('sourceMap', TRUE);
+        $parser->SetOption('sourceMapRootpath', '/'); // @link https://github.com/oyejorge/less.php/issues/127
+        $parser->SetOption('sourceMapBasepath', DRUPAL_ROOT); // @link https://github.com/oyejorge/less.php/issues/127
+      }
     }
 
     $parser->parseFile($input_file);
@@ -43,7 +47,7 @@ function _less_less_php($input_file, $less_settings) {
     $output_data = $parser->getCss();
     
     // Dependencies list is not populated until after Less_Parser::getCss().
-    if ($less_settings['less_devel']) {
+    if ($less_settings[LESS_DEVEL]) {
       
       $dependencies = $parser->AllParsedFiles();
       
