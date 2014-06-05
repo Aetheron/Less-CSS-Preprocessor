@@ -21,11 +21,10 @@ function less_cron_queue_info() {
  * Removes all stale compiled css files that are no longer in use.
  */
 function less_cron() {
-  $less_dir = _less_get_dir();
   
   $file_scan_options = array(
     // Adding current dir to excludes.
-    'nomask' => '/(\.\.?|CVS|' . preg_quote($less_dir) . ')$/',
+    'nomask' => '/(\.\.?|CVS|' . preg_quote(_less_get_dir()) . ')$/',
     'recurse' => FALSE,
   );
   $found_files = file_scan_directory('public://less', '/^.+$/', $file_scan_options);

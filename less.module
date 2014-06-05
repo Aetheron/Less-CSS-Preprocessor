@@ -117,8 +117,7 @@ function _less_attach_src($styles) {
  */
 function _less_pre_render($styles) {
   
-  $less_devel = variable_get(LESS_DEVEL, FALSE);
-  $less_dir = _less_get_dir();
+  $less_devel = (bool) variable_get(LESS_DEVEL, FALSE);
   
   if ($less_devel) {
     
@@ -547,30 +546,6 @@ function _less_ensure_directory($directory_path) {
   }
   
   return $is_dir;
-}
-
-/**
- * Implements hook_form_alter().
- * 
- * Includes files that have hook_form_FORM_ID_alter() implementations within.
- */
-function less_form_alter(&$form, &$form_state, $form_id) {
-  
-  $group = NULL;
-  
-  switch ($form_id) {
-    case 'system_theme_settings':
-      $group = 'theme';
-      break;
-      
-    case 'wysiwyg_profile_form':
-      $group = 'wysiwyg';
-      break;
-  }
-  
-  if (isset($group)) {
-    module_load_include('inc', 'less', 'less.' . $group);
-  }
 }
 
 /**

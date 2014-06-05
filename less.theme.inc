@@ -84,11 +84,12 @@ function _less_setting_form_element($system_name, $less_settings, $saved_setting
   );
   
   foreach ($less_settings as $var_name => $var_value) {
+    
     $form[$var_name] = array(
       '#type' => 'textfield',
       '#title' => $var_name,
       '#default_value' => !empty($saved_settings[$var_name]) ? $saved_settings[$var_name] : NULL,
-      '#description' => 'Default value: ' . $var_value, // @TODO remove this line/change to something else?
+      '#description' => t('Default value: %variable_value', array('%variable_value' => $var_value)),
       '#attributes' => array('placeholder' => $var_value),
     );
   }

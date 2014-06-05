@@ -13,7 +13,7 @@ function less_settings_form($form, &$form_state) {
   $form['less_flush'] = array(
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
-    '#value' => t('Click this button regenerate all LESS files once.'),
+    '#value' => t('Click this button to flag all LESS files for regeneration.'),
   );
 
   $form['less_flush']['flush'] = array(
@@ -45,7 +45,7 @@ function less_settings_form($form, &$form_state) {
       '#title' => t('@engine_name - <a href="@vendor_url">@vendor_url</a>', array('@engine_name' => $less_engine['name'], '@vendor_url' => $less_engine['vendor url'])),
       '#return_value' => $less_engine['machine name'],
       '#description' => t('Missing - Click vendor link above to read installation instructions.'),
-      '#disabled' => !($less_engine['installed']),
+      '#disabled' => empty($less_engine['installed']),
     );
     
     if ($less_engine['installed']) {
@@ -64,7 +64,7 @@ function less_settings_form($form, &$form_state) {
   $form[LESS_SOURCE_MAPS] = array(
     '#type' => 'checkbox',
     '#title' => t('Source Maps'),
-    '#description' => t('Enable watch mode while developer mode is active to automatically reload styles when changes are detected, including changes to @import-ed files. Does not cause a page reload.'),
+    '#description' => t('Enable source maps output while "LESS developer mode" is enabled.'),
     '#default_value' => variable_get(LESS_SOURCE_MAPS, FALSE),
     '#states' => array(
       'enabled' => array(
@@ -104,8 +104,7 @@ function less_settings_form_submit($form, &$form_state) {
  */
 function _flush_less($form, &$form_state) {
 
-  _less_get_dir(TRUE);
-  cache_clear_all('less:', 'cache', TRUE);
+  less_flush_caches();
 
   drupal_set_message(t('LESS files cache cleared.'), 'status');
 }
