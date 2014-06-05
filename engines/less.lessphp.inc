@@ -43,7 +43,7 @@ function _less_lessphp($less_settings) {
       $less->setPreserveComments(TRUE);
       $cache = $less->cachedCompile($input_file);
       
-      _less_cache_dependencies($input_file, $cache['files']);
+      _less_cache_dependencies($input_file, array_keys($cache['files']));
       
       $output_data = $cache['compiled'];
     }

@@ -70,7 +70,7 @@ function _less_process_file(&$item) {
  */
 function _less_cache_dependencies($input_file, $dependencies = array()) {
   
-  // Add $input_file to $dependencies as it is not in return from engines.
+  // Add $input_file to $dependencies as it is not in return from some engines.
   $dependencies = array_merge(array($input_file), (array) $dependencies);
   
   $watched_files = array();

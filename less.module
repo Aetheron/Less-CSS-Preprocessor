@@ -321,7 +321,7 @@ function _less_registry() {
           if (!empty($system_item->info['stylesheets'])) {
             foreach ($system_item->info['stylesheets'] as $stylesheets) {
               foreach ($stylesheets as $stylesheet) {
-                if (drupal_substr($stylesheet, -5) == '.less') {
+                if (_less_is_less_filename($stylesheet)) {
                   $static_stylesheets[$stylesheet] = $system_item_name;
                 }
               }

@@ -38,18 +38,18 @@ function less_settings_form($form, &$form_state) {
   
   foreach ($less_engines as $less_engine) {
     
-    $form['less_engine']['#options'][$less_engine['name']] = $less_engine['name'];
+    $form['less_engine']['#options'][$less_engine['machine name']] = $less_engine['name'];
     
-    $form['less_engine'][$less_engine['name']] = array(
+    $form['less_engine'][$less_engine['machine name']] = array(
       '#type' => 'radio',
       '#title' => t('@engine_name - <a href="@vendor_url">@vendor_url</a>', array('@engine_name' => $less_engine['name'], '@vendor_url' => $less_engine['vendor url'])),
-      '#return_value' => $less_engine['name'],
+      '#return_value' => $less_engine['machine name'],
       '#description' => t('Missing - Click vendor link above to read installation instructions.'),
       '#disabled' => !($less_engine['installed']),
     );
     
     if ($less_engine['installed']) {
-      $form['less_engine'][$less_engine['name']]['#description'] = t('v%version Installed', array('%version' => $less_engine['version']));
+      $form['less_engine'][$less_engine['machine name']]['#description'] = t('v%version Installed', array('%version' => $less_engine['version']));
     }
     
   }
