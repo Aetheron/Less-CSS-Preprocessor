@@ -11,6 +11,7 @@ configure = admin/config/development/less
 dependencies[] = libraries
 
 files[] = class.lessjs.inc
+files[] = class.lessautoprefixer.inc
 
 ; Testing file
 files[] = less.test

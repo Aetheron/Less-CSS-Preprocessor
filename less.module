@@ -10,6 +10,8 @@
 
 define('LESS_PERMISSION', 'administer less');
 
+define('LESS_AUTOPREFIXER', 'less_autoprefixer');
+
 define('LESS_DEVEL', 'less_devel');
 define('LESS_WATCH', 'less_watch');
 define('LESS_SOURCE_MAPS', 'less_source_maps');
@@ -422,6 +424,7 @@ function less_get_settings($system_name = NULL) {
         'token' => '_less_token_replace',
       ),
       'paths' => array(),
+      LESS_AUTOPREFIXER => (bool) variable_get(LESS_AUTOPREFIXER, FALSE),
       LESS_DEVEL => (bool) variable_get(LESS_DEVEL, FALSE),
       LESS_SOURCE_MAPS => (bool) variable_get(LESS_SOURCE_MAPS, FALSE),
       'theme' => $theme,

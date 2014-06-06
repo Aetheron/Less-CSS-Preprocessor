@@ -96,12 +96,8 @@ function _less_check_build(&$item) {
 
 function _less_process_file(&$item) {
   
-  $input_file = $item['data'];
-  
-  $output_file = $item['less']['output_file'];
-  
   // $output_file doesn't exist or is flagged for build.
-  if (!is_file($output_file) || !empty($item['less']['build_required'])) {
+  if (!is_file($item['less']['output_file']) || !empty($item['less']['build_required'])) {
     
     $output_data = NULL;
     $error = NULL;
@@ -123,7 +119,7 @@ function _less_process_file(&$item) {
     
     if (!empty($error)) {
       
-      $message_vars = array('@message' => $error, '%input_file' => $input_file);
+      $message_vars = array('@message' => $error, '%input_file' => $item['less']['input_file']);
       
       watchdog('LESS', 'LESS error: @message, %input_file', $message_vars, WATCHDOG_ERROR);
       
@@ -135,16 +131,35 @@ function _less_process_file(&$item) {
     if (isset($output_data)) {
       
       // Fix paths for images as .css is in different location.
-      $output_data = _less_rewrite_paths($input_file, $output_data);
+      $output_data = _less_rewrite_paths($item['less']['input_file'], $output_data);
       
-      file_unmanaged_save_data($output_data, $output_file, FILE_EXISTS_REPLACE);
+      file_unmanaged_save_data($output_data, $item['less']['output_file'], FILE_EXISTS_REPLACE);
+    }
+    
+    if (is_file($item['less']['output_file']) && $item['less'][LESS_AUTOPREFIXER]) {
+      
+      if (($lessautoprefixer_library = libraries_load('lessautoprefixer')) && $lessautoprefixer_library['installed']) {
+        
+        list($output_data, $error) = _less_lessautopreifxer($item['less']);
+        
+        if (!empty($error)) {
+          
+          $message_vars = array('@message' => $error, '%input_file' => $item['less']['output_file']);
+          
+          watchdog('LESS', 'Autoprefixer error: @message, %input_file', $message_vars, WATCHDOG_ERROR);
+          
+          if (user_access(LESS_PERMISSION)) {
+            drupal_set_message(t('Autoprefixer error: @message, %input_file', $message_vars), 'error');
+          }
+        }
+      }
     }
   }
 
-  if (is_file($output_file)) {
+  if (is_file($item['less']['output_file'])) {
     
     // Set render path of the stylesheet to the compiled output.
-    $item['data'] = $output_file;
+    $item['data'] = $item['less']['output_file'];
   }
 
 }
@@ -185,7 +200,7 @@ function _less_cache_dependencies($input_file, $dependencies = array()) {
   foreach ($dependencies as $dependency) {
     
     // Full path on file should enforce uniqueness in associative array.
-    $watched_files[realpath($dependency)] = filemtime($dependency);
+    $watched_files[drupal_realpath($dependency)] = filemtime($dependency);
   }
   
   cache_set('less:devel:' . drupal_hash_base64($input_file), $watched_files);

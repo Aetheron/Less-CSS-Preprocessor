@@ -96,6 +96,32 @@ function less_libraries_info() {
     ),
   );
   
+  /**
+   * Mainline version of LESS language.
+   */
+  $libraries['lessautoprefixer'] = array(
+    'name' => 'Autoprefixer',
+    'vendor url' => 'https://github.com/ai/autoprefixer', 
+    'download url' => 'https://github.com/ai/autoprefixer/releases',
+    'library path' => drupal_get_path('module', 'less'),
+    'version callback' => '_less_lessautoprefixer_version',
+    'files' => array(
+      'php' => array(
+        'class.lessautoprefixer.inc',
+      ),
+    ),
+    'integration files' => array(
+      'less' => array(
+        'php' => array(
+          'engines/less.lessautoprefixer.inc',
+        ),
+      ),
+    ),
+    'versions' => array(
+      '1.1' => array(),
+    ),
+  );
+  
   return $libraries;
 }
 
@@ -204,4 +230,16 @@ function _less_lessjs_version() {
   $lessjs_version = new Lessjs(); // Should be autoloaded from definition in .info file.
   
   return preg_replace('/.*?([\d\.]+).*/', '$1', $lessjs_version->version());
+}
+
+/**
+ * 'version callback' for library 'autoprefixer'.
+ * 
+ * @return string 
+ */
+function _less_lessautoprefixer_version() {
+  
+  $lessautoprefixer_version = new LessAutoprefixer(); // Should be autoloaded from definition in .info file.
+  
+  return preg_replace('/.*?([\d\.]+).*/', '$1', $lessautoprefixer_version->version());
 }
