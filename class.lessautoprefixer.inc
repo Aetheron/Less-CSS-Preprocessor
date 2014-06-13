@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Contains 'lessjs' class; an abstraction layer for command line less.js.
+ * Contains 'LessAutoprefixer' class; an abstraction layer for command line Autoprefixer.
  */
 
 /**
- * 'lessjs' class.
+ * 'Autoprefixer' class.
  */
 class LessAutoprefixer {
   
@@ -21,7 +21,7 @@ class LessAutoprefixer {
   protected $error = NULL;
   
   /**
-   * Constructor function for 'lessjs'.
+   * Constructor function for 'LessAutoprefixer'.
    * 
    * @param string $input_file
    *   Path for .less file relative to getcwd().
@@ -32,10 +32,10 @@ class LessAutoprefixer {
   }
   
   /**
-   * Returns the version string from command line less.js.
+   * Returns the version string from command line Autoprefixer.
    * 
    * @return string
-   *   Version string from less.js.
+   *   Version string from Autoprefixer.
    */
   public function version() {
     
@@ -46,7 +46,7 @@ class LessAutoprefixer {
    * Returns the current error if one exists.
    * 
    * @return string
-   *   Error string returned by command line less.js.
+   *   Error string returned by command line Autoprefixer.
    */
   public function get_error() {
     return $this->error;
@@ -57,12 +57,6 @@ class LessAutoprefixer {
    * 
    * @param bool $enabled
    *   Set the source maps flag.
-   * @param string $rootpath
-   *   Value to be prepended to each source map URL.
-   *   @link http://lesscss.org/usage/#command-line-usage-source-map-rootpath
-   * @param string $basepath
-   *   Leading value to be stripped from each source map URL.
-   *   @link http://lesscss.org/usage/#command-line-usage-source-map-basepath
    */
   public function source_maps($enabled) {
     $this->source_maps_enabled = $enabled;
@@ -86,7 +80,6 @@ class LessAutoprefixer {
     }
     
     // Input file should be last argument.
-    // @link http://lesscss.org/usage/#command-line-usage-command-line-usage
     $arguments[] = $this->input_file;
     
     return $arguments;
