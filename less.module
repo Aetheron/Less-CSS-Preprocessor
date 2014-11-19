@@ -556,3 +556,49 @@ function _less_is_less_filename($filename) {
   
   return drupal_substr($filename, -5) === '.less';
 }
+
+/**
+ * Implements hook_less_engines().
+ *
+ * @return array
+ */
+function less_less_engines() {
+
+  return array(
+    'less.php' => 'LessEngineLess_php',
+    'lessphp' => 'LessEngineLessphp',
+    'less.js' => 'LessEngineLess_js',
+  );
+}
+
+function _less_get_engines() {
+
+  $registered_engines = module_invoke_all('less_engines');
+  drupal_alter('less_engines', $registered_engines);
+
+  return $registered_engines;
+}
+
+/**
+ * @param $input_file_path
+ *
+ * @return \LessEngineInterface
+ *
+ * @throws Exception
+ */
+function less_get_engine($input_file_path) {
+
+  $engines = _less_get_engines();
+  $selected_engine = _less_inc();
+
+  if (!empty($engines[$selected_engine])) {
+
+    $class_name = $engines[$selected_engine];
+
+    return new $class_name($input_file_path);
+  }
+  else {
+
+    throw new Exception('Unable to load LessEngine.');
+  }
+}

@@ -96,39 +96,51 @@ function _less_check_build(&$item) {
 }
 
 function _less_process_file(&$item) {
+
+  $less_settings = $item['less'];
   
   // $output_file doesn't exist or is flagged for build.
   if (!is_file($item['less']['output_file']) || !empty($item['less']['build_required'])) {
     
     $output_data = NULL;
     $error = NULL;
-    
-    switch (_less_inc()) {
-      case 'less.php':
-        list($output_data, $error) = _less_less_php($item['less']);
-        break;
-      case 'lessphp':
-        list($output_data, $error) = _less_lessphp($item['less']);
-        break;
-      case 'less.js':
-        list($output_data, $error) = _less_lessjs($item['less']);
-        break;
-      default:
-        $error = t('No engine found.');
-        break;
+
+    try {
+
+      $engine = less_get_engine($less_settings['input_file']);
+
+      $engine->setImportDirectories($less_settings['paths']);
+
+      if ($less_settings[LESS_DEVEL]) {
+
+        $engine->setSourceMaps($less_settings[LESS_SOURCE_MAPS], DRUPAL_ROOT, base_path());
+      }
+
+      $engine->modifyVariables($less_settings['variables']);
+
+      $output_data = $engine->compile();
+
+      if ($less_settings[LESS_DEVEL]) {
+
+        _less_cache_dependencies($less_settings['input_file'], $engine->getDependencies());
+      }
+
+      $error = $engine->getError();
     }
-    
-    if (!empty($error)) {
-      
-      $message_vars = array('@message' => $error, '%input_file' => $item['less']['input_file']);
-      
+    catch (Exception $e) {
+
+      $message_vars = array(
+        '@message' => $e->getMessage(),
+        '%input_file' => $item['less']['input_file'],
+      );
+
       watchdog('LESS', 'LESS error: @message, %input_file', $message_vars, WATCHDOG_ERROR);
-      
+
       if (user_access(LESS_PERMISSION)) {
         drupal_set_message(t('LESS error: @message, %input_file', $message_vars), 'error');
       }
     }
-    
+
     if (isset($output_data)) {
       
       // Fix paths for images as .css is in different location.

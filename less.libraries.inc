@@ -28,13 +28,6 @@ function less_libraries_info() {
         'lessc.inc.php',
       ),
     ),
-    'integration files' => array(
-      'less' => array(
-        'php' => array(
-          'engines/less.lessphp.inc',
-        ),
-      ),
-    ),
   );
   
   _less_lessphp_locate($libraries['lessphp']);
@@ -56,13 +49,6 @@ function less_libraries_info() {
         'Less.php',
       ),
     ),
-    'integration files' => array(
-      'less' => array(
-        'php' => array(
-          'engines/less.less_php.inc',
-        ),
-      ),
-    ),
     'versions' => array(
       '1.7.0' => array(),
     ),
@@ -82,13 +68,6 @@ function less_libraries_info() {
     'files' => array(
       'php' => array(
         'class.lessjs.inc',
-      ),
-    ),
-    'integration files' => array(
-      'less' => array(
-        'php' => array(
-          'engines/less.less_js.inc',
-        ),
       ),
     ),
     'versions' => array(

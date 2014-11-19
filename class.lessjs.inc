@@ -19,7 +19,7 @@ class Lessjs {
   protected $include_paths = array();
   
   // @link http://lesscss.org/usage/#command-line-usage-global-variable
-  protected $global_variables = array();
+  protected $modify_variables = array();
   
   protected $source_maps_enabled = FALSE;
   
@@ -86,9 +86,9 @@ class Lessjs {
    * @param string $variable_value
    *   The variable value.
    */
-  public function global_var($variable_name, $variable_value) {
+  public function modify_var($variable_name, $variable_value) {
     
-    $this->global_variables[$variable_name] = $variable_value;
+    $this->modify_variables[$variable_name] = $variable_value;
   }
   
   /**
@@ -130,10 +130,10 @@ class Lessjs {
     }
     
     // Add any defined variables.
-    foreach ($this->global_variables as $global_variable_name => $global_variable_value) {
+    foreach ($this->modify_variables as $global_variable_name => $global_variable_value) {
       
       // @link http://lesscss.org/usage/#command-line-usage-global-variable
-      $arguments[] = '--global-var=' . escapeshellarg($global_variable_name . '=' . $global_variable_value);
+      $arguments[] = '--modify-var=' . escapeshellarg($global_variable_name . '=' . $global_variable_value);
     }
     
     // Set service map flags.

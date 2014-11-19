@@ -21,13 +21,16 @@ function less_settings_form($form, &$form_state) {
     '#submit' => array('_flush_less'),
     '#value' => t('Flush LESS files'),
   );
-  
-  $less_engines = array(
-    libraries_detect('less.js'),
-    libraries_detect('less.php'),
-    libraries_detect('lessphp'),
-  );
-  
+
+  $registered_engines = _less_get_engines();
+
+  $less_engines = array();
+
+  foreach ($registered_engines as $library => $engine) {
+
+    $less_engines[] = libraries_detect($library);
+  }
+
   $less_engine_element = array(
     '#type' => 'radios',
     '#title' => t('LESS engine'),
