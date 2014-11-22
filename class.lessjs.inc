@@ -14,19 +14,35 @@ class Lessjs {
   private static $base_command = 'lessc';
   
   protected $input_file = NULL;
-  
-  // @link http://lesscss.org/usage/#command-line-usage-include-paths
+
+  /**
+   * @var string[] $include_paths
+   *
+   * @link http://lesscss.org/usage/#command-line-usage-include-paths
+   */
   protected $include_paths = array();
-  
-  // @link http://lesscss.org/usage/#command-line-usage-global-variable
+
+  /**
+   * @var string[] $modify_variables
+   *
+   * @link http://lesscss.org/usage/#command-line-usage-modify-variable
+   */
   protected $modify_variables = array();
   
   protected $source_maps_enabled = FALSE;
-  
-  // @link http://lesscss.org/usage/#command-line-usage-source-map-rootpath
+
+  /**
+   * @var null|string $source_map_rootpath
+   *
+   * @link http://lesscss.org/usage/#command-line-usage-source-map-rootpath
+   */
   protected $source_map_rootpath = NULL;
-  
-  // @link http://lesscss.org/usage/#command-line-usage-source-map-basepath
+
+  /**
+   * @var null|string $source_map_basepath
+   *
+   * @link http://lesscss.org/usage/#command-line-usage-source-map-basepath
+   */
   protected $source_map_basepath = NULL;
   
   // Holds value for current error.
@@ -79,7 +95,7 @@ class Lessjs {
   }
   
   /**
-   * Add LESS variable that will be set with the '--global-var' argument.
+   * Add LESS variable that will be set with the '--modify-var' argument.
    * 
    * @param string $variable_name
    *   The variable name.
@@ -90,24 +106,25 @@ class Lessjs {
     
     $this->modify_variables[$variable_name] = $variable_value;
   }
-  
+
   /**
    * Enable source maps for current file, and configure source map paths.
-   * 
-   * @param bool $enabled
+   *
+   * @param bool   $enabled
    *   Set the source maps flag.
-   * @param string $rootpath
-   *   Value to be prepended to each source map URL.
-   *   @link http://lesscss.org/usage/#command-line-usage-source-map-rootpath
-   * @param string $basepath
+   * @param string $base_path
    *   Leading value to be stripped from each source map URL.
-   *   @link http://lesscss.org/usage/#command-line-usage-source-map-basepath
+   * @param string $root_path
+   *   Value to be prepended to each source map URL.
+   *
+   * @link http://lesscss.org/usage/#command-line-usage-source-map-rootpath
+   * @link http://lesscss.org/usage/#command-line-usage-source-map-basepath
    */
-  public function source_maps($enabled, $rootpath = NULL, $basepath = NULL) {
+  public function source_maps($enabled, $base_path = NULL, $root_path = NULL) {
     $this->source_maps_enabled = $enabled;
     
-    $this->source_map_rootpath = $rootpath;
-    $this->source_map_basepath = $basepath;
+    $this->source_map_basepath = $base_path;
+    $this->source_map_rootpath = $root_path;
   }
   
   /**
@@ -130,13 +147,15 @@ class Lessjs {
     }
     
     // Add any defined variables.
-    foreach ($this->modify_variables as $global_variable_name => $global_variable_value) {
-      
-      // @link http://lesscss.org/usage/#command-line-usage-global-variable
-      $arguments[] = '--modify-var=' . escapeshellarg($global_variable_name . '=' . $global_variable_value);
+    foreach ($this->modify_variables as $modify_variable_name => $modify_variable_value) {
+
+      /**
+       * @link http://lesscss.org/usage/#command-line-usage-global-variable
+       */
+      $arguments[] = '--modify-var=' . escapeshellarg($modify_variable_name . '=' . $modify_variable_value);
     }
     
-    // Set service map flags.
+    // Set source map flags.
     if ($this->source_maps_enabled) {
       
       if (isset($this->source_map_rootpath)) {
@@ -148,8 +167,10 @@ class Lessjs {
         
         $arguments[] = '--source-map-basepath=' . escapeshellarg($this->source_map_basepath);
       }
-      
-      // @link http://lesscss.org/usage/#command-line-usage-source-map-map-inline
+
+      /**
+       * @link http://lesscss.org/usage/#command-line-usage-source-map-map-inline
+       */
       $arguments[] = '--source-map-map-inline';
     }
     
@@ -227,9 +248,13 @@ class Lessjs {
       
       $output_data = stream_get_contents($pipes[1]);
       fclose($pipes[1]);
-      
-      $this->error = stream_get_contents($pipes[2]);
+
+      $error = stream_get_contents($pipes[2]);
       fclose($pipes[2]);
+
+      if (!empty($error)) {
+        throw new Exception($error);
+      }
       
       proc_close($process);
     }

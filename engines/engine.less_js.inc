@@ -23,11 +23,11 @@ class LessEngineLess_js extends LessEngine implements LessEngineInterface {
     }
   }
 
-  public function setSourceMaps($enabled = FALSE, $base_path = '/', $root_path = NULL) {
+  public function setSourceMaps($enabled = FALSE, $base_path = NULL, $root_path = '/') {
 
     $this->source_maps_enabled = $enabled;
 
-    $this->less_js_parser->source_maps($enabled, $root_path, $base_path);
+    $this->less_js_parser->source_maps($enabled, $base_path, $root_path);
   }
 
   public function modifyVariables(array $variables) {

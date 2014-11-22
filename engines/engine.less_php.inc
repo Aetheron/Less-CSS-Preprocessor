@@ -22,17 +22,14 @@ class LessEngineLess_php extends LessEngine implements LessEngineInterface {
     $this->less_php_parser->SetImportDirs(array_fill_keys($directories, ''));
   }
 
-  public function setSourceMaps($enabled = FALSE, $base_path = '/', $root_path = NULL) {
+  public function setSourceMaps($enabled = FALSE, $base_path = NULL, $root_path  = '/') {
 
     $this->source_maps_enabled = $enabled;
 
     $this->less_php_parser->SetOption('sourceMap', $enabled);
 
-    /**
-     * @link https://github.com/oyejorge/less.php/issues/127
-     */
-    $this->less_php_parser->SetOption('sourceMapRootpath', $base_path);
-    $this->less_php_parser->SetOption('sourceMapBasepath', $root_path);
+    $this->less_php_parser->SetOption('sourceMapBasepath', $base_path);
+    $this->less_php_parser->SetOption('sourceMapRootpath', $root_path);
   }
 
   public function getDependencies() {

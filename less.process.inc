@@ -57,7 +57,7 @@ function _less_output_path(&$item) {
     '!settings_hash' => drupal_hash_base64(drupal_json_encode($less_settings)),
   );
   
-  $output_path = strtr('public://less/!less_output_dir/!input_file_basename.!settings_hash.css', $output_path_array);
+  $output_path = strtr(LESS_DIRECTORY . '/!input_file_basename.!settings_hash.css', $output_path_array);
   
   // Ensure the destination directory exists.
   if (_less_ensure_directory(dirname($output_path))) {

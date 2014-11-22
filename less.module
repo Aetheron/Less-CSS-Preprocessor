@@ -16,6 +16,8 @@ define('LESS_DEVEL', 'less_devel');
 define('LESS_WATCH', 'less_watch');
 define('LESS_SOURCE_MAPS', 'less_source_maps');
 
+define('LESS_DIRECTORY', 'public://less');
+
 require_once dirname(__FILE__) . '/less.libraries.inc';
 require_once dirname(__FILE__) . '/less.cron.inc';
 require_once dirname(__FILE__) . '/less.wysiwyg.inc';
@@ -396,6 +398,7 @@ function less_get_settings($system_name = NULL) {
     
     // Defaults.
     $data = array(
+      'build_cache_id' => _less_get_dir(),
       'variables' => array(),
       'functions' => array(
         'token' => '_less_token_replace',

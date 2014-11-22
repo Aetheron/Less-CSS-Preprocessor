@@ -22,14 +22,5 @@ function less_cron_queue_info() {
  */
 function less_cron() {
   
-  $file_scan_options = array(
-    // Adding current dir to excludes.
-    'nomask' => '/(\.\.?|CVS|' . preg_quote(_less_get_dir()) . ')$/',
-    'recurse' => FALSE,
-  );
-  $found_files = file_scan_directory('public://less', '/^.+$/', $file_scan_options);
-
-  foreach ($found_files as $found_file) {
-    file_unmanaged_delete_recursive($found_file->uri);
-  }
+  file_scan_directory(LESS_DIRECTORY, '/.+/', array('callback' => 'drupal_delete_file_if_stale'));
 }
