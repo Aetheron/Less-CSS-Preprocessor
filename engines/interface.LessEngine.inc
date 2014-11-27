@@ -32,10 +32,5 @@ interface LessEngineInterface {
   /**
    * @return string
    */
-  public function getError();
-
-  /**
-   * @return string
-   */
   public function compile();
 }

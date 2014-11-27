@@ -45,18 +45,20 @@ class Lessjs {
    */
   protected $source_map_basepath = NULL;
   
-  // Holds value for current error.
-  protected $error = NULL;
-  
   /**
    * Constructor function for 'lessjs'.
    * 
    * @param string $input_file
    *   Path for .less file relative to getcwd().
    */
-  public function __construct($input_file = NULL) {
+  private function __construct($input_file) {
     
     $this->input_file = $input_file;
+  }
+
+  public static function load($input_file = NULL) {
+
+    return new self($input_file);
   }
   
   /**
@@ -65,19 +67,9 @@ class Lessjs {
    * @return string
    *   Version string from less.js.
    */
-  public function version() {
+  public static function version() {
     
-    return $this->proc_open(array('--version'));
-  }
-  
-  /**
-   * Returns the current error if one exists.
-   * 
-   * @return string
-   *   Error string returned by command line less.js.
-   */
-  public function get_error() {
-    return $this->error;
+    return self::load()->proc_open(array('--version'));
   }
   
   /**

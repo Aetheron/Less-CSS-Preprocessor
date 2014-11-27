@@ -89,13 +89,6 @@ function less_libraries_info() {
         'class.lessautoprefixer.inc',
       ),
     ),
-    'integration files' => array(
-      'less' => array(
-        'php' => array(
-          'engines/less.lessautoprefixer.inc',
-        ),
-      ),
-    ),
     'versions' => array(
       '1.1' => array(),
     ),
@@ -206,9 +199,7 @@ function _less_libraries_determine_location(&$library, $locations, $version_file
  */
 function _less_lessjs_version() {
   
-  $lessjs_version = new Lessjs(); // Should be autoloaded from definition in .info file.
-  
-  return preg_replace('/.*?([\d\.]+).*/', '$1', $lessjs_version->version());
+  return preg_replace('/.*?([\d\.]+).*/', '$1', Lessjs::version());
 }
 
 /**
@@ -218,7 +209,5 @@ function _less_lessjs_version() {
  */
 function _less_lessautoprefixer_version() {
   
-  $lessautoprefixer_version = new LessAutoprefixer(); // Should be autoloaded from definition in .info file.
-  
-  return preg_replace('/.*?([\d\.]+).*/', '$1', $lessautoprefixer_version->version());
+  return preg_replace('/.*?([\d\.]+).*/', '$1', LessAutoprefixer::version());
 }

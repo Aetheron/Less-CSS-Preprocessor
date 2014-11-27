@@ -17,18 +17,25 @@ class LessAutoprefixer {
   
   protected $source_maps_enabled = FALSE;
   
-  // Holds value for current error.
-  protected $error = NULL;
-  
   /**
    * Constructor function for 'LessAutoprefixer'.
    * 
    * @param string $input_file
    *   Path for .less file relative to getcwd().
    */
-  public function __construct($input_file = NULL) {
+  private function __construct($input_file) {
     
     $this->input_file = $input_file;
+  }
+
+  /**
+   * @param string|null $input_file
+   *
+   * @return LessAutoprefixer
+   */
+  public static function load($input_file = NULL) {
+
+    return new self($input_file);
   }
   
   /**
@@ -37,19 +44,9 @@ class LessAutoprefixer {
    * @return string
    *   Version string from Autoprefixer.
    */
-  public function version() {
+  public static function version() {
     
-    return $this->proc_open(array('--version'));
-  }
-  
-  /**
-   * Returns the current error if one exists.
-   * 
-   * @return string
-   *   Error string returned by command line Autoprefixer.
-   */
-  public function get_error() {
-    return $this->error;
+    return self::load()->proc_open(array('--version'));
   }
   
   /**
@@ -128,9 +125,13 @@ class LessAutoprefixer {
       
       $output_data = stream_get_contents($pipes[1]);
       fclose($pipes[1]);
-      
-      $this->error = stream_get_contents($pipes[2]);
+
+      $error = stream_get_contents($pipes[2]);
       fclose($pipes[2]);
+
+      if (!empty($error)) {
+        throw new Exception($error);
+      }
       
       proc_close($process);
     }

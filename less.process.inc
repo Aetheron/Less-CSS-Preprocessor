@@ -6,9 +6,13 @@
  */
 
 
-
-
-function _less_attach_settings(&$item) {
+/**
+ * Attach LESS settings to each file as appropriate.
+ *
+ * @param array[] $item
+ * @param string  $key
+ */
+function _less_attach_settings(&$item, $key) {
   
   $defaults = array(
     'less' => less_get_settings(), // Bare defaults for LESS.
@@ -40,8 +44,14 @@ function _less_attach_settings(&$item) {
   $item['less']['paths'] = array_flip($item['less']['paths']);
 }
 
-function _less_output_path(&$item) {
-  
+/**
+ * Determine output filename and add it to the settings array.
+ *
+ * @param array[] $item
+ * @param string  $key
+ */
+function _less_output_path(&$item, $key) {
+
   $input_file = $item['less']['input_file'];
   
   $less_settings = $item['less'];
@@ -50,14 +60,14 @@ function _less_output_path(&$item) {
   array_multisort($less_settings);
   
   $output_path_array = array(
-    '!less_output_dir' => _less_get_dir(),
+    '!less_output_dir' => LESS_DIRECTORY,
     // Strip '.css' extension of filenames following the RTL extension pattern.
     '!input_file_basename' => basename(basename($input_file, '.less'), '.css'),
     // drupal_json_encode() is used because serialize() throws an error with lambda functions.
     '!settings_hash' => drupal_hash_base64(drupal_json_encode($less_settings)),
   );
   
-  $output_path = strtr(LESS_DIRECTORY . '/!input_file_basename.!settings_hash.css', $output_path_array);
+  $output_path = format_string('!less_output_dir/!input_file_basename.!settings_hash.css', $output_path_array);
   
   // Ensure the destination directory exists.
   if (_less_ensure_directory(dirname($output_path))) {
@@ -66,11 +76,16 @@ function _less_output_path(&$item) {
   }
 }
 
-function _less_check_build(&$item) {
+/**
+ * Check if the file needs to be rebuilt based on changes to @import'ed files.
+ *
+ * @param array[] $item
+ * @param string  $key
+ */
+function _less_check_build(&$item, $key) {
   
   $input_file = $item['less']['input_file'];
-  $output_file = $item['less']['output_file'];
-  
+
   $build_required = FALSE;
   
   // Set $rebuild if this file or its children have been modified.
@@ -95,7 +110,15 @@ function _less_check_build(&$item) {
   $item['less']['build_required'] = $build_required;
 }
 
-function _less_process_file(&$item) {
+/**
+ * Process a .less file and save the compiled styles.
+ *
+ * @param array[] $item
+ * @param string  $key
+ *
+ * @see \LessEngineInterface
+ */
+function _less_process_file(&$item, $key) {
 
   $less_settings = $item['less'];
   
@@ -103,7 +126,6 @@ function _less_process_file(&$item) {
   if (!is_file($item['less']['output_file']) || !empty($item['less']['build_required'])) {
     
     $output_data = NULL;
-    $error = NULL;
 
     try {
 
@@ -124,8 +146,6 @@ function _less_process_file(&$item) {
 
         _less_cache_dependencies($less_settings['input_file'], $engine->getDependencies());
       }
-
-      $error = $engine->getError();
     }
     catch (Exception $e) {
 
@@ -152,15 +172,20 @@ function _less_process_file(&$item) {
     if (is_file($item['less']['output_file']) && $item['less'][LESS_AUTOPREFIXER]) {
       
       if (($lessautoprefixer_library = libraries_load('lessautoprefixer')) && $lessautoprefixer_library['installed']) {
-        
-        list($output_data, $error) = _less_lessautopreifxer($item['less']);
-        
-        if (!empty($error)) {
-          
-          $message_vars = array('@message' => $error, '%input_file' => $item['less']['output_file']);
-          
+
+        try {
+
+          LessAutoprefixer::load(drupal_realpath($item['less']['output_file']))->compile();
+        }
+        catch (Exception $e) {
+
+          $message_vars = array(
+            '@message' => $e->getMessage(),
+            '%input_file' => $item['less']['output_file'],
+          );
+
           watchdog('LESS', 'Autoprefixer error: @message, %input_file', $message_vars, WATCHDOG_ERROR);
-          
+
           if (user_access(LESS_PERMISSION)) {
             drupal_set_message(t('Autoprefixer error: @message, %input_file', $message_vars), 'error');
           }
@@ -177,12 +202,14 @@ function _less_process_file(&$item) {
 
 }
 
-function _less_store_cache_info(&$item) {
+/**
+ * @param array[] $item
+ * @param string  $key
+ */
+function _less_store_cache_info(&$item, $key) {
   
   // Only match when output_file exists.
   if ($item['data'] === $item['less']['output_file']) {
-    
-    global $theme;
     
     $less_watch_cache = $item;
     
@@ -200,11 +227,11 @@ function _less_store_cache_info(&$item) {
  * 
  * @param string $input_file
  *   Path of source file.
- * @param array $dependencies
+ * @param string[] $dependencies
  *   Array of files that are @import'ed in $input_file, recursively.
  */
 function _less_cache_dependencies($input_file, $dependencies = array()) {
-  
+
   // Add $input_file to $dependencies as it is not in return from some engines.
   $dependencies = array_merge(array($input_file), (array) $dependencies);
   
@@ -225,7 +252,10 @@ function _less_cache_dependencies($input_file, $dependencies = array()) {
  * This function processes $contents and rewrites relative paths to be absolute
  * from web root. This is mainly used to ensure that compiled .less files still
  * reference images at their original paths.
- * 
+ *
+ * @param string $input_filepath
+ * @param string $contents
+ *
  * @return string
  *   Processed styles with replaced paths.
  * 

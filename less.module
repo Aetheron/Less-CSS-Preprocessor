@@ -19,7 +19,6 @@ define('LESS_SOURCE_MAPS', 'less_source_maps');
 define('LESS_DIRECTORY', 'public://less');
 
 require_once dirname(__FILE__) . '/less.libraries.inc';
-require_once dirname(__FILE__) . '/less.cron.inc';
 require_once dirname(__FILE__) . '/less.wysiwyg.inc';
 require_once dirname(__FILE__) . '/less.theme.inc';
 
@@ -142,51 +141,41 @@ function _less_pre_render($styles) {
     if (user_access(LESS_PERMISSION) && flood_is_allowed('less_devel_warning', 1)) {
       flood_register_event('less_devel_warning');
       
-      $message_vars = array("@url" => url('admin/config/development/less'));
+      $message_vars = array(
+        '@url' => url('admin/config/development/less'),
+      );
       drupal_set_message(t('LESS files are being checked for modifications on every request. Remember to <a href="@url">turn off</a> this feature on production websites.', $message_vars), 'status');
     }
   }
   
-  $less_file_keys = _less_children($styles['#items']);
-  
-  if (!empty($less_file_keys)) {
+  $less_items = array_intersect_key($styles['#items'], array_flip(_less_children($styles['#items'])));
+
+  if (!empty($less_items)) {
     
     require_once dirname(__FILE__) . '/less.process.inc';
     
     // Attach settings to each item.
-    foreach ($less_file_keys as $less_filepath) {
-      
-      _less_attach_settings($styles['#items'][$less_filepath]);
-    }
-    
+    array_walk($less_items, '_less_attach_settings');
+
     // Determine output path for each item.
-    foreach ($less_file_keys as $less_filepath) {
-      
-      _less_output_path($styles['#items'][$less_filepath]);
-    }
-    
-    // Check for rebuild each page
+    array_walk($less_items, '_less_output_path');
+
+    // Check for rebuild each page.
     if ($less_devel) {
-      
-      foreach ($less_file_keys as $less_filepath) {
-        
-        _less_check_build($styles['#items'][$less_filepath]);
-      }
+
+      array_walk($less_items, '_less_check_build');
     }
-    
-    foreach ($less_file_keys as $less_filepath) {
-      
-      _less_process_file($styles['#items'][$less_filepath]);
-    }
-    
+
+    // Compile '.less' files.
+    array_walk($less_items, '_less_process_file');
+
     // Store cache information.
     if ($less_devel) {
-      
-      foreach ($less_file_keys as $less_filepath) {
-        
-        _less_store_cache_info($styles['#items'][$less_filepath]);
-      }
+
+      array_walk($less_items, '_less_store_cache_info');
     }
+
+    $styles['#items'] = array_replace($styles['#items'], $less_items);
   }
   
   return $styles;
@@ -209,9 +198,20 @@ function less_admin_menu_cache_info() {
 }
 
 /**
+ * Implements hook_cron_queue_info().
+ *
+ * This hook runs before cache flush during cron. Reliably lets us know if its
+ * cron or not.
+ */
+function less_cron_queue_info() {
+
+  drupal_static('less_cron', TRUE);
+}
+
+/**
  * Implements hook_flush_caches().
  *
- * Flushes compiled LESS files during cache flush, except during cron.
+ * Triggers rebuild of all LESS files during cache flush, except during cron.
  */
 function less_flush_caches() {
   if (!drupal_static('less_cron')) {
@@ -220,7 +220,20 @@ function less_flush_caches() {
     _less_get_dir(TRUE);
     cache_clear_all('less:', 'cache', TRUE);
   }
+
+  less_clear_css_cache();
+
   return array();
+}
+
+/**
+ * Deletes all stale compiled LESS files that are no longer in use.
+ *
+ * @see drupal_delete_file_if_stale().
+ */
+function less_clear_css_cache() {
+
+  file_scan_directory(LESS_DIRECTORY, '/.+/', array('callback' => 'drupal_delete_file_if_stale'));
 }
 
 /**
@@ -476,11 +489,15 @@ function less_get_settings($system_name = NULL) {
 
 /**
  * Handler for LESS function token().
+ *
+ * @param string[] $arg
+ *
+ * @return array
  */
 function _less_token_replace($arg) {
-  list($type, $delimeter, $value) = $arg;
+  list($type, $delimiter, $value) = $arg;
   
-  return array($type, $delimeter, array(token_replace($value[0])));
+  return array($type, $delimiter, array(token_replace($value[0])));
 }
 
 /**
@@ -517,7 +534,9 @@ function _less_ensure_directory($directory_path) {
     
     if (!$is_dir) {
       // There is a problem with the directory.
-      $message_vars = array('%dir' => $directory_path);
+      $message_vars = array(
+        '%dir' => $directory_path,
+      );
       
       watchdog('LESS', 'LESS could not create a directory in %dir', $message_vars, WATCHDOG_ERROR);
       
@@ -563,7 +582,7 @@ function _less_is_less_filename($filename) {
 /**
  * Implements hook_less_engines().
  *
- * @return array
+ * @return string[]
  */
 function less_less_engines() {
 
@@ -574,6 +593,9 @@ function less_less_engines() {
   );
 }
 
+/**
+ * @return \LessEngineInterface[]
+ */
 function _less_get_engines() {
 
   $registered_engines = module_invoke_all('less_engines');
@@ -585,7 +607,7 @@ function _less_get_engines() {
 /**
  * @param $input_file_path
  *
- * @return \LessEngineInterface
+ * @return \LessEngine
  *
  * @throws Exception
  */

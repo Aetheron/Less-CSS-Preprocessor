@@ -19,7 +19,9 @@
  * to appear in order.
  * 
  * Variables returned by this function are cached.
- * 
+ *
+ * @return array
+ *
  * @see hook_less_variables_alter().
  * @see hook_less_variables_SYSTEM_NAME_alter().
  */
@@ -33,9 +35,9 @@ function hook_less_variables() {
 /**
  * Alter LESS variables provided by other modules or themes.
  * 
- * @param $less_variables
+ * @param string[] $less_variables
  *   Flat associative array of variables, where key is variable name.
- * @param $system_name
+ * @param string   $system_name
  *   A string of the system_name of the module or theme that this applies to.
  * 
  * @see hook_less_variables().
@@ -48,7 +50,7 @@ function hook_less_variables_alter(&$less_variables, $system_name) {
 /**
  * Alter LESS variables provided by other modules or themes.
  * 
- * @param $less_variables
+ * @param string[] $less_variables
  *   Flat associative array of variables, where key is variable name.
  * 
  * @see hook_less_variables().
@@ -61,11 +63,13 @@ function hook_less_variables_SYSTEM_NAME_alter(&$less_variables) {
 /**
  * Define LESS functions.
  * 
- * @return
+ * @return array
  *   An associative where keys are LESS functions and values are PHP function
  *   names or anonymous functions. Anonymous functions require PHP >= 5.3.
  * 
  * @see http://leafo.net/lessphp/docs/#custom_functions
+ *
+ * @deprecated
  */
 function hook_less_functions() {
   return array(
@@ -81,14 +85,16 @@ function hook_less_functions() {
 /**
  * Implements hook_less_functions_alter().
  * 
- * @param $less_functions
+ * @param string[] $less_functions
  *   Flat associative array of functions, where key is LESS function name and
  *   value is PHP function name or Anonymous function: 
  *   (http://php.net/manual/en/functions.anonymous.php)
- * @param $system_name
+ * @param string   $system_name
  *   A string of the system_name of the module or theme that this applies to.
  * 
  * @see http://leafo.net/lessphp/docs/#custom_functions
+ *
+ * @deprecated
  */
 function hook_less_functions_alter(&$less_functions, $system_name) {
   
@@ -97,12 +103,14 @@ function hook_less_functions_alter(&$less_functions, $system_name) {
 /**
  * Implements hook_less_functions_SYSTEM_NAME_alter().
  * 
- * @param $less_functions
+ * @param string[] $less_functions
  *   Flat associative array of functions, where key is variable and value is
  *   function name or Anonymous function: 
  *   (http://php.net/manual/en/functions.anonymous.php)
  * 
  * @see http://leafo.net/lessphp/docs/#custom_functions
+ *
+ * @deprecated
  */
 function hook_less_functions_SYSTEM_NAME_alter(&$less_functions) {
   

@@ -11,7 +11,7 @@ class LessEngineLess_js extends LessEngine implements LessEngineInterface {
 
     parent::__construct($input_file_path);
 
-    $this->less_js_parser = new Lessjs($input_file_path);
+    $this->less_js_parser = Lessjs::load($input_file_path);
   }
 
   public function setImportDirectories(array $directories) {
@@ -53,13 +53,6 @@ class LessEngineLess_js extends LessEngine implements LessEngineInterface {
     try {
 
       $compiled_styles = $this->less_js_parser->compile();
-
-      $error = $this->less_js_parser->get_error();
-
-      if (!empty($error)) {
-
-        throw new Exception($error);
-      }
     }
     catch (Exception $e) {
 

@@ -4,8 +4,6 @@ abstract class LessEngine implements LessEngineInterface {
 
   protected $input_file_path = NULL;
 
-  protected $error = array();
-
   protected $dependencies = array();
 
   protected $variables = array();
@@ -40,14 +38,6 @@ abstract class LessEngine implements LessEngineInterface {
   public function getDependencies() {
 
     return $this->dependencies;
-  }
-
-  /**
-   * @return array
-   */
-  public function getError() {
-
-    return $this->error;
   }
 
   /**

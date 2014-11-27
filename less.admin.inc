@@ -71,7 +71,7 @@ function less_settings_form($form, &$form_state) {
   );
   
   if ($lessautoprefixer_library['installed']) {
-    $form['less_autoprefixer']['#description'] .= '<br />'. t('v%version Installed', array('%version' => $lessautoprefixer_library['version']));
+    $form[LESS_AUTOPREFIXER]['#description'] .= '<br />'. t('v%version Installed', array('%version' => $lessautoprefixer_library['version']));
   }
   
   $form['developer_options'] = array(
