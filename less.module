@@ -342,7 +342,7 @@ function _less_registry() {
           
           // Invoke hook_less_variables(), results should be static.
           if ($module_defaults = module_invoke($system_item_name, 'less_variables')) {
-            $static_defaults[$system_item_name] = array_merge((array) $static_defaults[$system_item_name], array_filter($module_defaults));
+            $static_defaults[$system_item_name] = array_replace((array) $static_defaults[$system_item_name], array_filter($module_defaults));
           }
         }
       }
@@ -429,12 +429,12 @@ function less_get_settings($system_name = NULL) {
      */
     // Cached default variables from .info files and hook_less_variables().
     if (!empty($defaults_cache[$system_name])) {
-      $data['variables'] = array_merge($data['variables'], array_filter($defaults_cache[$system_name]));
+      $data['variables'] = array_replace($data['variables'], array_filter($defaults_cache[$system_name]));
     }
     
     // Saved variable values from current theme.
     if (!is_null($theme_settings) && !empty($theme_settings[$system_name])) {
-      $data['variables'] = array_merge($data['variables'], array_filter($theme_settings[$system_name]));
+      $data['variables'] = array_replace($data['variables'], array_filter($theme_settings[$system_name]));
     }
     
     // Prevent $system_name from being altered.
@@ -452,14 +452,14 @@ function less_get_settings($system_name = NULL) {
      * anonymous functions.
      */
     if (module_hook($system_name, 'less_functions')) {
-      $data['functions'] = array_merge($data['functions'], (array) module_invoke($system_name, 'less_functions'));
+      $data['functions'] = array_replace($data['functions'], (array) module_invoke($system_name, 'less_functions'));
     }
     
     // Prevent $system_name from being altered.
     $alter_system_name = $system_name;
     // Invoke hook_less_functions_alter().
     drupal_alter('less_functions', $data['functions'], $alter_system_name);
-    // Invoke hook_less_functions_system_name_alter().
+    // Invoke hook_less_functions_SYSTEM_NAME_alter().
     drupal_alter('less_functions_' . $system_name, $data['functions']);
     
     
@@ -468,14 +468,14 @@ function less_get_settings($system_name = NULL) {
      * 
      */
     if (module_hook($system_name, 'less_paths')) {
-      $data['paths'] = array_merge($data['paths'], (array) module_invoke($system_name, 'less_paths'));
+      $data['paths'] = array_unique(array_merge($data['paths'], (array) module_invoke($system_name, 'less_paths')));
     }
     
     // Prevent $system_name from being altered.
     $alter_system_name = $system_name;
-    // Invoke hook_less_functions_alter().
+    // Invoke hook_less_paths_alter().
     drupal_alter('less_paths', $data['paths'], $alter_system_name);
-    // Invoke hook_less_functions_system_name_alter().
+    // Invoke hook_less_paths_SYSTEM_NAME_alter().
     drupal_alter('less_paths_' . $system_name, $data['paths']);
     
     $data['paths'] = array_unique($data['paths']);

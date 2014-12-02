@@ -10,10 +10,19 @@
  */
 class Lessjs {
   
-  // Base command is hardcoded here to reduce security vulnerability.
-  private static $base_command = 'lessc';
-  
-  protected $input_file = NULL;
+  /**
+   * Base command is hardcoded here to reduce security vulnerability.
+   *
+   * @var string
+   */
+  const BASE_COMMAND = 'lessc';
+
+  /**
+   * Path to .less input file.
+   *
+   * @var null|string
+   */
+  protected $input_file;
 
   /**
    * @var string[] $include_paths
@@ -122,7 +131,7 @@ class Lessjs {
   /**
    * Provides list to command line arguments for execution.
    * 
-   * @return array
+   * @return string[]
    *   Array of command line arguments.
    */
   private function command_arguments() {
@@ -176,7 +185,7 @@ class Lessjs {
   /**
    * Returns list of files that input file depends on.
    * 
-   * @return array
+   * @return string[]
    *   List of @import'ed files.
    */
   public function depends() {
@@ -207,12 +216,22 @@ class Lessjs {
     
     return $this->proc_open($this->command_arguments());
   }
-  
-  private function proc_open($command_arguments = array(), $stdin = NULL) {
+
+  /**
+   * Execute compilation command through proc_open().
+   *
+   * @param string[] $command_arguments
+   *
+   * @return null|string
+   * @throws Exception
+   *
+   * @see proc_open()
+   */
+  private function proc_open(array $command_arguments = array()) {
     
     $output_data = NULL;
     
-    $command = implode(' ', array_merge(array(self::$base_command), $command_arguments));
+    $command = implode(' ', array_merge(array(self::BASE_COMMAND), $command_arguments));
     
     // Handles for data exchange.
     $pipes = array(
@@ -232,10 +251,7 @@ class Lessjs {
     
     if (is_resource($process)) {
       
-      // STDIN not currently used in LESS module.
-      if ($this->input_file === '-' && isset($stdin)) {
-        fwrite($pipes[0], $stdin);
-      }
+      // STDIN not used in the LESS module.
       fclose($pipes[0]); // fclose() on STDIN executes $command, if program is expecting input from STDIN.
       
       $output_data = stream_get_contents($pipes[1]);

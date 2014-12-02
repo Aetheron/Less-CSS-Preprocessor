@@ -1,12 +1,22 @@
 <?php
 
-class LessEngineLessphp extends LessEngine implements LessEngineInterface {
+/**
+ * Class \LessEngineLessphp
+ */
+class LessEngineLessphp extends LessEngine {
 
   /**
-   * @var Less_Parser
+   * @var \lessc
    */
   private $less_php_parser;
 
+  /**
+   * Instantiates new instances of \lessc.
+   *
+   * @param string $input_file_path
+   *
+   * @see \lessc
+   */
   public function __construct($input_file_path) {
 
     parent::__construct($input_file_path);
@@ -14,20 +24,19 @@ class LessEngineLessphp extends LessEngine implements LessEngineInterface {
     $this->less_php_parser = new lessc();
   }
 
-  public function setImportDirectories(array $directories) {
-
-    parent::setImportDirectories($directories);
-
-    foreach ($directories as $directory) {
-      $this->less_php_parser->addImportDir($directory);
-    }
-  }
-
+  /**
+   * {@inheritdoc}
+   * This compiles using engine specific function calls.
+   */
   public function compile() {
 
     $compiled_styles = NULL;
 
     try {
+
+      foreach ($this->import_directories as $directory) {
+        $this->less_php_parser->addImportDir($directory);
+      }
 
       $cache = $this->less_php_parser->cachedCompile($this->input_file_path);
 

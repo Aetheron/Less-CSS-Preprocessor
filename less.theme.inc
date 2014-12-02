@@ -10,10 +10,11 @@
  */
 function less_form_system_theme_settings_alter(&$form, &$form_state) {
 
-  preg_match('/^theme_(?P<current_theme_key>[A-Za-z0-9_]+)_settings$/', $form['var']['#value'], $matches);
+  preg_match('/^theme_(?P<current_theme_key>\w+)_settings$/', $form['var']['#value'], $matches);
   
   // only show settings on forms for themes, not "Global settings"
   if (!empty($matches['current_theme_key'])) {
+
     $current_theme_key = $matches['current_theme_key'];
     
     $saved_settings = theme_get_setting('less', $current_theme_key);
@@ -32,8 +33,12 @@ function less_form_system_theme_settings_alter(&$form, &$form_state) {
     $less_module_settings = array();
     
     foreach ($system_items as $system_item_name => $system_item) {
+
       if (!empty($system_item->info['less']['vars'])) {
-        $less_module_settings[$system_item_name] = _less_setting_form_element($system_item_name, $system_item->info['less']['vars'], $saved_settings[$system_item_name], $system_item->info['name']);
+
+        $item_saved_settings = isset($saved_settings[$system_item_name]) ? $saved_settings[$system_item_name] : array();
+
+        $less_module_settings[$system_item_name] = _less_setting_form_element($system_item_name, $system_item->info['less']['vars'], $item_saved_settings, $system_item->info['name']);
         $less_module_settings[$system_item_name]['#group'] = 'less][modules_list';
       }
     }
@@ -62,18 +67,11 @@ function less_form_system_theme_settings_alter(&$form, &$form_state) {
         '#type' => 'vertical_tabs',
         '#prefix' => t('<h3>LESS settings</h3>'),
         '#tree' => TRUE,
-        '#weight' => -2, // only for debug purposes
         '#description' => t('These settings are per theme. Delete a value to use the default.'),
       );
       
       $form['less'] += $less_settings_form;
     }
-    
-    $form['less']['tokens'] = array(
-      '#theme' => 'token_tree',
-      '#token_types' => array('all'),
-    );
-    
   }
 }
 

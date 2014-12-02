@@ -17,7 +17,7 @@ function _less_attach_settings(&$item, $key) {
   $defaults = array(
     'less' => less_get_settings(), // Bare defaults for LESS.
   );
-  
+
   // These items must be reset for consistent operation.
   $nullify = array(
     'less' => array(
@@ -69,11 +69,7 @@ function _less_output_path(&$item, $key) {
   
   $output_path = format_string('!less_output_dir/!input_file_basename.!settings_hash.css', $output_path_array);
   
-  // Ensure the destination directory exists.
-  if (_less_ensure_directory(dirname($output_path))) {
-    
-    $item['less']['output_file'] = $output_path;
-  }
+  $item['less']['output_file'] = $output_path;
 }
 
 /**
@@ -165,8 +161,12 @@ function _less_process_file(&$item, $key) {
       
       // Fix paths for images as .css is in different location.
       $output_data = _less_rewrite_paths($item['less']['input_file'], $output_data);
-      
-      file_unmanaged_save_data($output_data, $item['less']['output_file'], FILE_EXISTS_REPLACE);
+
+      // Ensure the destination directory exists.
+      if (_less_ensure_directory(dirname($item['less']['output_file']))) {
+
+        file_unmanaged_save_data($output_data, $item['less']['output_file'], FILE_EXISTS_REPLACE);
+      }
     }
     
     if (is_file($item['less']['output_file']) && $item['less'][LESS_AUTOPREFIXER]) {
@@ -199,7 +199,6 @@ function _less_process_file(&$item, $key) {
     // Set render path of the stylesheet to the compiled output.
     $item['data'] = $item['less']['output_file'];
   }
-
 }
 
 /**

@@ -7,11 +7,12 @@
 
 /**
  * Implements hook_wysiwyg_editor_settings_alter().
+ *
  * Check the css_content WYSIWYG setting for LESS files and replace with 
  * generated CSS files where necessary.
  */
 function less_wysiwyg_editor_settings_alter(&$settings, $context) {
-  
+
   $wysiwyg = $context['editor']['name'];
   $stylesheets = array();
   
@@ -68,6 +69,11 @@ function less_wysiwyg_editor_settings_alter(&$settings, $context) {
   }
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * form_id = 'wysiwyg_profile'
+ */
 function less_form_wysiwyg_profile_form_alter(&$form, $form_state, $form_id) {
   $form['css']['css_path']['#description'] .= '<br />' . t('You may enter a path to a LESS file and it will be parsed automatically.');
 }

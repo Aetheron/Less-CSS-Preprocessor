@@ -57,7 +57,7 @@ function less_libraries_info() {
   _less_less_php_locate($libraries['less.php']);
   
   /**
-   * Mainline version of LESS language.
+   * Canonical version of LESS language.
    */
   $libraries['less.js'] = array(
     'name' => 'less.js',
@@ -167,26 +167,24 @@ function _less_lessphp_locate(&$library) {
  *   and value is the location of that file that to be included when this
  *   library is loaded with libraries_load().
  */
-function _less_libraries_determine_location(&$library, $locations, $version_files) {
+function _less_libraries_determine_location(array &$library, array $locations, array $version_files) {
   
-  foreach ($locations as $location) {
-    if ($location) {
-      
-      foreach ($version_files as $version_file => $class_file) {
-        
-        if (file_exists($location . DIRECTORY_SEPARATOR . $version_file)) {
-          
-          $library['library path'] = $location;
-          $library['files'] = array(
-            'php' => array(
-              $class_file,
-            ),
-          );
-          
-          $library['version arguments']['file'] = $version_file;
-          
-          break 2; // File has been found, skip remaining $locations and $version_files
-        }
+  foreach (array_filter($locations) as $location) {
+
+    foreach ($version_files as $version_file => $class_file) {
+
+      if (file_exists($location . DIRECTORY_SEPARATOR . $version_file)) {
+
+        $library['library path'] = $location;
+        $library['files'] = array(
+          'php' => array(
+            $class_file,
+          ),
+        );
+
+        $library['version arguments']['file'] = $version_file;
+
+        return; // File has been found, skip remaining $locations and $version_files
       }
     }
   }
