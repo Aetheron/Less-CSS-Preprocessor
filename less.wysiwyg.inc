@@ -8,45 +8,51 @@
 /**
  * Implements hook_wysiwyg_editor_settings_alter().
  *
- * Check the css_content WYSIWYG setting for LESS files and replace with 
+ * Check the CSS WYSIWYG setting for LESS files and replace with
  * generated CSS files where necessary.
  */
 function less_wysiwyg_editor_settings_alter(&$settings, $context) {
 
   $wysiwyg = $context['editor']['name'];
-  $stylesheets = array();
-  
-  switch ($wysiwyg) {
-    case 'tinymce':
-      if (!empty($settings['content_css'])) {
-        $stylesheets = explode(',', $settings['content_css']);
-      }
-      break;
-    case 'fckeditor':
-      if (!empty($settings['EditorAreaCSS'])) {
-        $stylesheets = explode(',', $settings['EditorAreaCSS']);
-      }
-      break;
-    case 'ckeditor':
-      if (!empty($settings['contentsCss'])) {
-        $stylesheets = $settings['contentsCss'];
-      }
-      break;
-  }
-  
-  if (!empty($stylesheets)) {
-    
+
+  // Each editor has a different $settings array key for CSS files.
+  $editors = array(
+    'tinymce' => 'content_css',
+    'fckeditor' => 'EditorAreaCSS',
+    'ckeditor' => 'contentsCss',
+  );
+
+  if (!empty($editors[$wysiwyg]) && !empty($settings[$editors[$wysiwyg]])) {
+
+    $stylesheets = $settings[$editors[$wysiwyg]];
+
+    // Keep track if comma separated paths, or array of paths.
+    $is_array = is_array($stylesheets);
+
+    if ($is_array === FALSE) {
+
+      // $stylesheets is a list of comma separated file paths.
+      $stylesheets = explode(',', $stylesheets);
+    }
+
+    // Prepare an array that can be handled by normal LESS module processing.
     $styles = array(
       '#items' => array(),
     );
     
     foreach ($stylesheets as $stylesheet) {
-      $styles['#items'][$stylesheet] = array(
-        // Paths are expected to be relative to DRUPAL_ROOT.
-        'data' => trim($stylesheet, '/'),
+
+      // Might contain ?query portion, separate parts.
+      $parts = drupal_parse_url($stylesheet);
+
+      // Paths are expected to be relative to DRUPAL_ROOT, trim leading '/'.
+      $path = trim($parts['path'], '/');
+
+      $styles['#items'][$path] = array(
+        'data' => $path,
       );
     }
-    
+
     $styles = _less_pre_render($styles);
 
     $processed_stylesheets = array();
@@ -54,18 +60,13 @@ function less_wysiwyg_editor_settings_alter(&$settings, $context) {
     foreach ($styles['#items'] as $file) {
       $processed_stylesheets[] = file_create_url($file['data']);
     }
-    
-    switch ($wysiwyg) {
-      case 'tinymce':
-        $settings['content_css'] = implode(',', $processed_stylesheets);
-        break;
-      case 'fckeditor':
-        $settings['EditorAreaCSS'] = implode(',', $processed_stylesheets);
-        break;
-      case 'ckeditor':
-        $settings['contentsCss'] = $processed_stylesheets;
-        break;
+
+    // Recombine file paths into comma separated list.
+    if ($is_array === FALSE) {
+      $processed_stylesheets = implode(',', $processed_stylesheets);
     }
+
+    $settings[$editors[$wysiwyg]] = $processed_stylesheets;
   }
 }
 
@@ -76,4 +77,18 @@ function less_wysiwyg_editor_settings_alter(&$settings, $context) {
  */
 function less_form_wysiwyg_profile_form_alter(&$form, $form_state, $form_id) {
   $form['css']['css_path']['#description'] .= '<br />' . t('You may enter a path to a LESS file and it will be parsed automatically.');
+}
+
+/**
+ * Implements hook_ckeditor_settings_alter().
+ */
+function less_ckeditor_settings_alter(&$settings) {
+
+  $context = array(
+    'editor' => array(
+      'name' => 'ckeditor',
+    ),
+  );
+
+  less_wysiwyg_editor_settings_alter($settings, $context);
 }
