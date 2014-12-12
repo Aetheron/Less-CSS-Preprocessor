@@ -21,7 +21,7 @@ class LessEngineLess_js extends LessEngine {
 
     parent::__construct($input_file_path);
 
-    $this->less_js_parser = Lessjs::load($this->input_file_path);
+    $this->less_js_parser = Lessjs::create($this->input_file_path);
   }
 
   /**

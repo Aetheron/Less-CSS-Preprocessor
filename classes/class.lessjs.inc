@@ -65,7 +65,7 @@ class Lessjs {
     $this->input_file = $input_file;
   }
 
-  public static function load($input_file = NULL) {
+  public static function create($input_file = NULL) {
 
     return new self($input_file);
   }
@@ -73,12 +73,24 @@ class Lessjs {
   /**
    * Returns the version string from command line less.js.
    * 
-   * @return string
-   *   Version string from less.js.
+   * @return string|null
+   *   Version string from less.js, or null if no version found.
    */
   public static function version() {
-    
-    return self::load()->proc_open(array('--version'));
+
+    $version = NULL;
+
+    try {
+
+      $version_response = self::create(NULL)->proc_open(array('--version'));
+
+      $version = preg_replace('/.*?([\d\.]+).*/', '$1', $version_response);
+    }
+    catch (Exception $e) {
+
+    }
+
+    return $version;
   }
   
   /**
@@ -246,25 +258,31 @@ class Lessjs {
       1 => array('pipe', 'w'), // STDOUT
       2 => array('pipe', 'w'), // STDERR
     );
-    
-    $process = proc_open($command, $descriptors, $pipes);
-    
-    if (is_resource($process)) {
-      
-      // STDIN not used in the LESS module.
-      fclose($pipes[0]); // fclose() on STDIN executes $command, if program is expecting input from STDIN.
-      
-      $output_data = stream_get_contents($pipes[1]);
-      fclose($pipes[1]);
 
-      $error = stream_get_contents($pipes[2]);
-      fclose($pipes[2]);
+    try {
 
-      if (!empty($error)) {
-        throw new Exception($error);
+      $process = proc_open($command, $descriptors, $pipes);
+
+      if (is_resource($process)) {
+
+        fclose($pipes[0]); // fclose() on STDIN executes $command, if program is expecting input from STDIN.
+
+        $output_data = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+
+        $error = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+
+        if (!empty($error)) {
+          throw new Exception($error);
+        }
+
+        proc_close($process);
       }
-      
-      proc_close($process);
+    }
+    catch (Exception $e) {
+
+      throw $e;
     }
     
     return $output_data;

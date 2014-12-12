@@ -175,7 +175,7 @@ function _less_process_file(&$item, $key) {
 
         try {
 
-          LessAutoprefixer::load(drupal_realpath($item['less']['output_file']))->compile();
+          LessAutoprefixer::create(drupal_realpath($item['less']['output_file']))->compile();
         }
         catch (Exception $e) {
 

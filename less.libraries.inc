@@ -63,8 +63,8 @@ function less_libraries_info() {
     'name' => 'less.js',
     'vendor url' => 'http://lesscss.org/', 
     'download url' => 'http://lesscss.org/usage/#using-less-environments',
-    'library path' => drupal_get_path('module', 'less'),
-    'version callback' => '_less_lessjs_version',
+    'library path' => drupal_get_path('module', 'less') . '/classes',
+    'version callback' => array('Lessjs', 'version'),
     'files' => array(
       'php' => array(
         'class.lessjs.inc',
@@ -76,14 +76,14 @@ function less_libraries_info() {
   );
   
   /**
-   * Mainline version of LESS language.
+   * Autoprefixer
    */
   $libraries['lessautoprefixer'] = array(
     'name' => 'Autoprefixer',
     'vendor url' => 'https://github.com/ai/autoprefixer', 
     'download url' => 'https://github.com/ai/autoprefixer/releases',
-    'library path' => drupal_get_path('module', 'less'),
-    'version callback' => '_less_lessautoprefixer_version',
+    'library path' => drupal_get_path('module', 'less') . '/classes',
+    'version callback' => array('LessAutoprefixer', 'version'),
     'files' => array(
       'php' => array(
         'class.lessautoprefixer.inc',
@@ -188,24 +188,4 @@ function _less_libraries_determine_location(array &$library, array $locations, a
       }
     }
   }
-}
-
-/**
- * 'version callback' for library 'less.js'.
- * 
- * @return string 
- */
-function _less_lessjs_version() {
-  
-  return preg_replace('/.*?([\d\.]+).*/', '$1', Lessjs::version());
-}
-
-/**
- * 'version callback' for library 'autoprefixer'.
- * 
- * @return string 
- */
-function _less_lessautoprefixer_version() {
-  
-  return preg_replace('/.*?([\d\.]+).*/', '$1', LessAutoprefixer::version());
 }

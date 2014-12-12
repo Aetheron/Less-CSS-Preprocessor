@@ -9,9 +9,9 @@
  * 'Autoprefixer' class.
  */
 class LessAutoprefixer {
-  
+
   // Base command is hardcoded here to reduce security vulnerability.
-  private static $base_command = 'autoprefixer';
+  const BASE_COMMAND = 'autoprefixer';
   
   protected $input_file = NULL;
   
@@ -23,17 +23,17 @@ class LessAutoprefixer {
    * @param string $input_file
    *   Path for .less file relative to getcwd().
    */
-  private function __construct($input_file) {
+  protected function __construct($input_file) {
     
     $this->input_file = $input_file;
   }
 
   /**
-   * @param string|null $input_file
+   * @param string $input_file
    *
    * @return LessAutoprefixer
    */
-  public static function load($input_file = NULL) {
+  public static function create($input_file) {
 
     return new self($input_file);
   }
@@ -41,12 +41,24 @@ class LessAutoprefixer {
   /**
    * Returns the version string from command line Autoprefixer.
    * 
-   * @return string
-   *   Version string from Autoprefixer.
+   * @return string|null
+   *   Version string from Autoprefixer, or null if no version found.
    */
   public static function version() {
-    
-    return self::load()->proc_open(array('--version'));
+
+    $version = NULL;
+
+    try {
+
+      $version_response = self::create(NULL)->proc_open(array('--version'));
+
+      $version = preg_replace('/.*?([\d\.]+).*/', '$1', $version_response);
+    }
+    catch (Exception $e) {
+
+    }
+
+    return $version;
   }
   
   /**
@@ -65,7 +77,7 @@ class LessAutoprefixer {
    * @return array
    *   Array of command line arguments.
    */
-  private function command_arguments() {
+  protected function command_arguments() {
     
     $arguments = array();
     
@@ -93,11 +105,11 @@ class LessAutoprefixer {
     return $this->proc_open($this->command_arguments());
   }
   
-  private function proc_open($command_arguments = array(), $stdin = NULL) {
+  protected function proc_open($command_arguments = array()) {
     
     $output_data = NULL;
     
-    $command = implode(' ', array_merge(array(self::$base_command), $command_arguments));
+    $command = implode(' ', array_merge(array(self::BASE_COMMAND), $command_arguments));
     
     // Handles for data exchange.
     $pipes = array(
@@ -112,28 +124,31 @@ class LessAutoprefixer {
       1 => array('pipe', 'w'), // STDOUT
       2 => array('pipe', 'w'), // STDERR
     );
-    
-    $process = proc_open($command, $descriptors, $pipes);
-    
-    if (is_resource($process)) {
-      
-      // STDIN not currently used in LESS module.
-      if ($this->input_file === '-' && isset($stdin)) {
-        fwrite($pipes[0], $stdin);
-      }
-      fclose($pipes[0]); // fclose() on STDIN executes $command, if program is expecting input from STDIN.
-      
-      $output_data = stream_get_contents($pipes[1]);
-      fclose($pipes[1]);
 
-      $error = stream_get_contents($pipes[2]);
-      fclose($pipes[2]);
+    try {
 
-      if (!empty($error)) {
-        throw new Exception($error);
+      $process = proc_open($command, $descriptors, $pipes);
+
+      if (is_resource($process)) {
+
+        fclose($pipes[0]); // fclose() on STDIN executes $command, if program is expecting input from STDIN.
+
+        $output_data = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+
+        $error = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+
+        if (!empty($error)) {
+          throw new Exception($error);
+        }
+
+        proc_close($process);
       }
-      
-      proc_close($process);
+    }
+    catch (Exception $e) {
+
+      throw $e;
     }
     
     return $output_data;
