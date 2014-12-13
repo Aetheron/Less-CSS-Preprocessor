@@ -6,71 +6,75 @@
  */
 
 /**
- * Implements hook_form_FORM_ID_alter() for system_theme_settings().
+ * Implements hook_form_alter().
  */
-function less_form_system_theme_settings_alter(&$form, &$form_state) {
+function less_form_alter(&$form, &$form_state, $form_id) {
 
-  preg_match('/^theme_(?P<current_theme_key>\w+)_settings$/', $form['var']['#value'], $matches);
-  
-  // only show settings on forms for themes, not "Global settings"
-  if (!empty($matches['current_theme_key'])) {
+  if ($form_id === 'system_theme_settings') {
 
-    $current_theme_key = $matches['current_theme_key'];
-    
-    $saved_settings = theme_get_setting('less', $current_theme_key);
-    
-    $less_settings_form = array();
-    
-    $theme_items = system_list('theme');
-    
-    if (isset($theme_items[$current_theme_key]) && !empty($theme_items[$current_theme_key]->info['less']['vars'])) {
-      $less_settings_form[$current_theme_key] = _less_setting_form_element($current_theme_key, $theme_items[$current_theme_key]->info['less']['vars'], $saved_settings[$current_theme_key]);
-    }
-    
-    // showing settings form for modules
-    $system_items = system_list('module_enabled');
-    
-    $less_module_settings = array();
-    
-    foreach ($system_items as $system_item_name => $system_item) {
+    preg_match('/^theme_(?P<current_theme_key>\w+)_settings$/', $form['var']['#value'], $matches);
 
-      if (!empty($system_item->info['less']['vars'])) {
+    // only show settings on forms for themes, not "Global settings"
+    if (!empty($matches['current_theme_key'])) {
 
-        $item_saved_settings = isset($saved_settings[$system_item_name]) ? $saved_settings[$system_item_name] : array();
+      $current_theme_key = $matches['current_theme_key'];
 
-        $less_module_settings[$system_item_name] = _less_setting_form_element($system_item_name, $system_item->info['less']['vars'], $item_saved_settings, $system_item->info['name']);
-        $less_module_settings[$system_item_name]['#group'] = 'less][modules_list';
+      $saved_settings = theme_get_setting('less', $current_theme_key);
+
+      $less_settings_form = array();
+
+      $theme_items = system_list('theme');
+
+      if (isset($theme_items[$current_theme_key]) && !empty($theme_items[$current_theme_key]->info['less']['vars'])) {
+        $less_settings_form[$current_theme_key] = _less_setting_form_element($current_theme_key, $theme_items[$current_theme_key]->info['less']['vars'], $saved_settings[$current_theme_key]);
       }
-    }
-    
-    if (!empty($less_module_settings)) {
-      
-      $less_settings_form['modules'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Modules'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-        '#parents' => array('less'), // make sure all settings are stored under the system name immediately inside the themes less settings array
-      );
 
-      $less_settings_form['modules']['modules_list'] = array(
-        '#type' => 'vertical_tabs',
-      );
+      // showing settings form for modules
+      $system_items = system_list('module_enabled');
 
-      $less_settings_form['modules'] += $less_module_settings;
-      
-    }
+      $less_module_settings = array();
 
-    if (!empty($less_settings_form)) {
-      
-      $form['less'] = array(
-        '#type' => 'vertical_tabs',
-        '#prefix' => t('<h3>LESS settings</h3>'),
-        '#tree' => TRUE,
-        '#description' => t('These settings are per theme. Delete a value to use the default.'),
-      );
-      
-      $form['less'] += $less_settings_form;
+      foreach ($system_items as $system_item_name => $system_item) {
+
+        if (!empty($system_item->info['less']['vars'])) {
+
+          $item_saved_settings = isset($saved_settings[$system_item_name]) ? $saved_settings[$system_item_name] : array();
+
+          $less_module_settings[$system_item_name] = _less_setting_form_element($system_item_name, $system_item->info['less']['vars'], $item_saved_settings, $system_item->info['name']);
+          $less_module_settings[$system_item_name]['#group'] = 'less][modules_list';
+        }
+      }
+
+      if (!empty($less_module_settings)) {
+
+        $less_settings_form['modules'] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Modules'),
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+          '#parents' => array('less'),
+          // make sure all settings are stored under the system name immediately inside the themes less settings array
+        );
+
+        $less_settings_form['modules']['modules_list'] = array(
+          '#type' => 'vertical_tabs',
+        );
+
+        $less_settings_form['modules'] += $less_module_settings;
+
+      }
+
+      if (!empty($less_settings_form)) {
+
+        $form['less'] = array(
+          '#type' => 'vertical_tabs',
+          '#prefix' => t('<h3>LESS settings</h3>'),
+          '#tree' => TRUE,
+          '#description' => t('These settings are per theme. Delete a value to use the default.'),
+        );
+
+        $form['less'] += $less_settings_form;
+      }
     }
   }
 }
@@ -81,7 +85,9 @@ function _less_setting_form_element($system_name, $less_settings, $saved_setting
     '#type' => 'fieldset',
     '#title' => isset($title) ? $title : $system_name,
   );
-  
+
+  $less_settings = array_replace($less_settings, (array) module_invoke($system_name, 'less_variables'));
+
   foreach ($less_settings as $var_name => $var_value) {
     
     $form[$var_name] = array(
