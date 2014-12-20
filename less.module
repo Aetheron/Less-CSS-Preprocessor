@@ -18,9 +18,9 @@ define('LESS_SOURCE_MAPS', 'less_source_maps');
 
 define('LESS_DIRECTORY', 'public://less');
 
-require_once dirname(__FILE__) . '/less.libraries.inc';
-require_once dirname(__FILE__) . '/less.wysiwyg.inc';
-require_once dirname(__FILE__) . '/less.theme.inc';
+require_once dirname(__FILE__) . '/includes/less.libraries.inc';
+require_once dirname(__FILE__) . '/includes/less.wysiwyg.inc';
+require_once dirname(__FILE__) . '/includes/less.theme.inc';
 
 /**
  * Implements hook_menu().
@@ -34,7 +34,7 @@ function less_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('less_settings_form'),
     'access arguments' => array(LESS_PERMISSION),
-    'file' => 'less.admin.inc',
+    'file' => 'includes/less.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
 
@@ -50,7 +50,7 @@ function less_menu() {
     'access callback' => 'variable_get',
     'access arguments' => array(LESS_WATCH, FALSE),
     'delivery callback' => 'drupal_json_output',
-    'file' => 'less.watch.inc',
+    'file' => 'includes/less.watch.inc',
   );
 
   return $items;
@@ -75,7 +75,7 @@ function less_element_info_alter(&$type) {
   
   // Prepend to the list of #pre_render functions so it runs first.
   array_unshift($type['styles']['#pre_render'], '_less_pre_render');
-  
+
   if (variable_get(LESS_DEVEL, FALSE)) {
     
     // Must run after drupal_pre_render_styles() to attach any attributes.
@@ -134,7 +134,7 @@ function _less_pre_render($styles) {
   if ($less_devel) {
     
     if (variable_get(LESS_WATCH, FALSE)) {
-      drupal_add_js(drupal_get_path('module', 'less') . '/less.watch.js');
+      drupal_add_js(drupal_get_path('module', 'less') . '/scripts/less.watch.js');
     }
     
     // Warn users once every hour that less is checking for file modifications.
@@ -152,7 +152,7 @@ function _less_pre_render($styles) {
 
   if (!empty($less_items)) {
     
-    require_once dirname(__FILE__) . '/less.process.inc';
+    require_once dirname(__FILE__) . '/includes/less.process.inc';
     
     // Attach settings to each item.
     array_walk($less_items, '_less_attach_settings');
