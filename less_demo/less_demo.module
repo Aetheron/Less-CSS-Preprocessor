@@ -22,6 +22,7 @@ function less_demo_menu() {
  * Implements hook_admin_paths().
  */
 function less_demo_admin_paths() {
+
   return array(
     'admin/config/development/less/demo' => FALSE,
   );
@@ -31,8 +32,10 @@ function less_demo_admin_paths() {
  * Implements hook_less_variables().
  */
 function less_demo_less_variables() {
+
   return array(
-    '@test' => '#ccc',
+    '@text_glow' => 'black', // This will take precedence over .info file value.
+    '@test' => '#ccc', // This value is defined for the first time here.
   );
 }
 
@@ -40,8 +43,10 @@ function less_demo_less_variables() {
  * Implements hook_less_variables_alter().
  */
 function less_demo_less_variables_alter(&$less_variables, $system_name) {
-  if ($system_name == 'less_demo') {
-    
+
+  if ($system_name === 'less_demo') {
+
+    $less_variables['@text_glow'] = 'blue';
   }
 }
 
@@ -49,13 +54,15 @@ function less_demo_less_variables_alter(&$less_variables, $system_name) {
  * Implements hook_less_variables_SYSTEM_NAME_alter().
  */
 function less_demo_less_variables_less_demo_alter(&$less_variables) {
-  
+
+  $less_variables['@test'] = 'green';
 }
 
 /**
  * Implements hook_less_functions().
  */
 function less_demo_less_functions() {
+
   return array(
     'swap' => '_less_demo_reverse',
   );
@@ -65,7 +72,8 @@ function less_demo_less_functions() {
  * Implements hook_less_functions_alter().
  */
 function less_demo_less_functions_alter(&$less_functions, $system_name) {
-  if ($system_name == 'less_demo') {
+
+  if ($system_name === 'less_demo') {
     
   }
 }
@@ -78,12 +86,22 @@ function less_demo_less_functions_less_demo_alter(&$less_functions) {
 }
 
 /**
+ *  Implements hook_less_paths().
+ */
+function less_demo_less_paths() {
+
+  return array(
+    drupal_get_path('module', 'less_demo') . '/libs',
+  );
+}
+
+/**
  * LESS function that takes a series of arguments and reverses their order.
  */
 function _less_demo_reverse($arg) {
   list($type, $delimeter, $value) = $arg;
   
-  if ($type == 'list') {
+  if ($type === 'list') {
     $arg = array($type, $delimeter, array_reverse($value));
   }
   

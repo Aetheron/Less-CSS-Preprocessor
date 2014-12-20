@@ -13,6 +13,8 @@ LESS requires at least one of three possible engines available:
 [less.js]: http://lesscss.org/usage/#command-line-usage
 [leafo/lessphp]: http://leafo.net/lessphp/
 
+[Command Line Requirements]: #command
+
  -  [oyejorge/less.php]
     
     This is a pure PHP implementation, which is good for shared hosting, or if you don't feel comfortable
@@ -23,18 +25,44 @@ LESS requires at least one of three possible engines available:
     Requirements:
     
     1. [Libraries](https://drupal.org/project/libraries)
-    2. [oyejorge/less.php] installed such that 'Less.php' is at `sites/all/libraries/less.php/Less.php`
+    2. [oyejorge/less.php] installed such that `Less.php` is located at `sites/all/libraries/less.php/Less.php`
 
  -  [less.js]
     
-    This requires that PHP is able to use the `proc_open` function and call `lessc` from the `DRUPAL_ROOT` folder.
+    You can read about how to install here: [less.js]
+    
+    Please read [Command Line Requirements] to ensure that *less.js* is installed properly.
 
 
  - [leafo/lessphp] *Deprecated*
     
-    lessphp library unpacked so that 'lessc.inc.php' is located at 'sites/all/libraries/lessphp/lessc.inc.php'.
+    *leafo/lessphp* library unpacked so that `lessc.inc.php` is located at `sites/all/libraries/lessphp/lessc.inc.php`.
     
     This library is no longer recommended as it lacks support for a majority of new features in the latest canonical LESS.
+
+Optional
+--------
+
+### Autoprefixer
+
+[postcss/autoprefixer]: https://github.com/postcss/autoprefixer
+
+[postcss/autoprefixer]
+> Write your CSS rules without vendor prefixes (in fact, forget about them entirely)
+> 
+> Autoprefixer will use the data based on current browser popularity and property support to apply prefixes for you.
+
+Please read [Command Line Requirements] to ensure that *autoprefixer* is installed properly.
+
+<a name="command"></a>
+Command Line Requirements
+-------------------------
+
+Both [less.js] and [postcss/autoprefixer] require that PHP can call these programs directly from the command line.
+
+It is up to the installer (you) to ensure that the `lessc` and/or `autoprefixer` are able to be called by PHP without a full path to the binary.
+
+Thus is it required that you configure your PATH for the user that your PHP installation runs under to ensure that these programs can be run by name without the full path.
 
 
 LESS Development:
