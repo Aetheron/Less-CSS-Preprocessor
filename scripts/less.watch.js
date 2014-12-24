@@ -45,8 +45,7 @@
               data: {
                 less_files: watched_files
               },
-              timeout: self.interval,
-              
+
               // On success, reset failed request counter and update style links.
               success: function ( response ) {
                 
