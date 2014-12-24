@@ -65,6 +65,15 @@ function less_libraries_info() {
     'download url' => 'http://lesscss.org/usage/#using-less-environments',
     'library path' => drupal_get_path('module', 'less') . '/classes',
     'version callback' => array('Lessjs', 'version'),
+    /**
+     * Integer indexed 'version arguments' array causes 'version callback' to be
+     * run through call_user_func_array().
+     *
+     * @see call_user_func_array()
+     */
+    'version arguments' => array(
+      0 => 'not used',
+    ),
     'files' => array(
       'php' => array(
         'class.lessjs.inc',
@@ -84,6 +93,15 @@ function less_libraries_info() {
     'download url' => 'https://github.com/ai/autoprefixer/releases',
     'library path' => drupal_get_path('module', 'less') . '/classes',
     'version callback' => array('LessAutoprefixer', 'version'),
+    /**
+     * Integer indexed 'version arguments' array causes 'version callback' to be
+     * run through call_user_func_array().
+     *
+     * @see call_user_func_array()
+     */
+    'version arguments' => array(
+      0 => 'not used',
+    ),
     'files' => array(
       'php' => array(
         'class.lessautoprefixer.inc',
