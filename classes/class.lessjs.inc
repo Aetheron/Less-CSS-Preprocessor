@@ -208,8 +208,8 @@ class Lessjs {
     
     $depends_arguments[] = '--depends';
     
-    $depends_arguments[] = $output_key;
-    
+    $depends_arguments[] = drupal_realpath(LESS_DIRECTORY) . DIRECTORY_SEPARATOR . $output_key;
+
     $depends_files_spaced = $this->proc_open(array_merge($this->command_arguments(), $depends_arguments));
     
     // {$output_key}: /path/to/file/1 /path/to/file/2
