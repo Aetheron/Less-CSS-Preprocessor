@@ -163,7 +163,7 @@ class Lessjs {
     foreach ($this->modify_variables as $modify_variable_name => $modify_variable_value) {
 
       /**
-       * @link http://lesscss.org/usage/#command-line-usage-global-variable
+       * @link http://lesscss.org/usage/#command-line-usage-modify-variable
        */
       $arguments[] = '--modify-var=' . escapeshellarg($modify_variable_name . '=' . $modify_variable_value);
     }
