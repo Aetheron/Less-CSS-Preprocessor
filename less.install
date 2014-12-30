@@ -33,7 +33,7 @@ function less_requirements($phase) {
     case 'runtime':
       
       $less_engine_loaded = _less_inc();
-  
+
       if (!empty($less_engine_loaded)) {
         
         $loaded_engine = libraries_detect($less_engine_loaded);
@@ -48,6 +48,7 @@ function less_requirements($phase) {
       else {
         $requirements['less_library'] = array(
           'title' => $t('LESS'),
+          'value' => '',
           'description' => $t('A LESS library was not detected. Please follow the instructions on the <a href="!url" target="_blank">LESS project page</a> to install the a LESS library.', array("!url" => url('https://drupal.org/project/less'))),
           'severity' => REQUIREMENT_ERROR,
         );
