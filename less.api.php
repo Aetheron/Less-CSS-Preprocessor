@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the LESS module.
+ * Hooks provided by the Less module.
  */
 
 /**
@@ -18,7 +18,9 @@
  * Variables are lazy evaluated, so variables that depend on others do not have
  * to appear in order.
  * 
- * Variables returned by this function are cached.
+ * Variables returned by this function are cached, therefore values returned
+ * by this function should not change. If you need variables to change from page
+ * to page, use hook_less_variables_alter().
  *
  * @return array
  *
@@ -89,7 +91,7 @@ function hook_less_paths() {
 function hook_less_paths_alter(array &$less_paths, $system_name) {
 
   if ($system_name === 'less_demo') {
-
+    $less_paths[] = drupal_get_path('module', 'less_demo') . '/other_path';
   }
 }
 
@@ -121,9 +123,9 @@ function hook_less_functions() {
   return array(
     'less_func_1' => 'php_func_1',
     'less_func_2' => function ($arg) {
-      list($type, $delimeter, $value) = $arg;
+      list($type, $delimiter, $value) = $arg;
       
-      return array($type, $delimeter, $value);
+      return array($type, $delimiter, $value);
     },
   );
 }

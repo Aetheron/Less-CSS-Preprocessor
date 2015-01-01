@@ -23,6 +23,36 @@ require_once dirname(__FILE__) . '/includes/less.wysiwyg.inc';
 require_once dirname(__FILE__) . '/includes/less.theme.inc';
 
 /**
+ * Implements hook_hook_info().
+ */
+function less_hook_info() {
+
+  $less_hooks = array(
+    'engines',
+    'variables',
+    'paths',
+    'functions',
+  );
+
+  $hooks = array();
+
+  /**
+   * We don't have to worry about less_HOOK_SYSTEM_NAME_alter variations here
+   * as less_HOOK_alter is run immediately before and should include the
+   * MODULE.less.inc file containing any
+   * less_HOOK_SYSTEM_NAME_alter() implementations.
+   */
+  foreach ($less_hooks as $hook) {
+    $hooks[] = 'less_' . $hook;
+    $hooks[] = 'less_' . $hook . '_alter';
+  }
+
+  return array_fill_keys($hooks, array(
+    'group' => 'less',
+  ));
+}
+
+/**
  * Implements hook_menu().
  */
 function less_menu() {
