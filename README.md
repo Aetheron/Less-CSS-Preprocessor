@@ -33,12 +33,13 @@ LESS requires at least one of three possible engines available:
     
     Please read [Command Line Requirements] to ensure that *less.js* is installed properly.
 
-
  - [leafo/lessphp] *Deprecated*
     
     *leafo/lessphp* library unpacked so that `lessc.inc.php` is located at `sites/all/libraries/lessphp/lessc.inc.php`.
     
     This library is no longer recommended as it lacks support for a majority of new features in the latest canonical LESS.
+
+Once installed, you must select your engine on 'admin/config/development/less'.
 
 Optional
 --------
