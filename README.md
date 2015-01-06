@@ -41,6 +41,8 @@ LESS requires at least one of three possible engines available:
 
 Once installed, you must select your engine on 'admin/config/development/less'.
 
+Less engines written in PHP do not support embedded JavaScript evaluation.
+
 Optional
 --------
 
