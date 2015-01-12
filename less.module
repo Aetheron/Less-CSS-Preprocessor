@@ -481,7 +481,7 @@ function less_get_settings($system_name = NULL) {
      * LESS functions are not stored in the cache table since they could be
      * anonymous functions.
      */
-    if (module_hook($system_name, 'less_functions')) {
+    if (!empty($system_name) && module_hook($system_name, 'less_functions')) {
       $data['functions'] = array_replace($data['functions'], (array) module_invoke($system_name, 'less_functions'));
     }
     
@@ -497,7 +497,7 @@ function less_get_settings($system_name = NULL) {
      * Grab the LESS include paths.
      * 
      */
-    if (module_hook($system_name, 'less_paths')) {
+    if (!empty($system_name) && module_hook($system_name, 'less_paths')) {
       $data['paths'] = array_unique(array_merge($data['paths'], (array) module_invoke($system_name, 'less_paths')));
     }
     
