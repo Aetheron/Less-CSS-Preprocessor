@@ -371,7 +371,7 @@ function _less_registry() {
           }
           
           // Invoke hook_less_variables(), results should be static.
-          if ($module_defaults = module_invoke($system_item_name, 'less_variables')) {
+          if (module_exists($system_item_name) && ($module_defaults = module_invoke($system_item_name, 'less_variables'))) {
             $static_defaults[$system_item_name] = array_replace((array) $static_defaults[$system_item_name], array_filter($module_defaults));
           }
         }
@@ -430,7 +430,9 @@ function less_get_settings($system_name = NULL) {
   if (!isset($less_settings_static[$system_name])) {
     
     global $theme;
-    
+
+    $valid_module = !empty($system_name) && module_exists($system_name);
+
     $theme_settings = theme_get_setting('less', $theme);
     
     $defaults_cache = &drupal_static('less_defaults');
@@ -481,7 +483,7 @@ function less_get_settings($system_name = NULL) {
      * LESS functions are not stored in the cache table since they could be
      * anonymous functions.
      */
-    if (!empty($system_name) && module_hook($system_name, 'less_functions')) {
+    if ($valid_module && module_hook($system_name, 'less_functions')) {
       $data['functions'] = array_replace($data['functions'], (array) module_invoke($system_name, 'less_functions'));
     }
     
@@ -497,7 +499,7 @@ function less_get_settings($system_name = NULL) {
      * Grab the LESS include paths.
      * 
      */
-    if (!empty($system_name) && module_hook($system_name, 'less_paths')) {
+    if ($valid_module && module_hook($system_name, 'less_paths')) {
       $data['paths'] = array_unique(array_merge($data['paths'], (array) module_invoke($system_name, 'less_paths')));
     }
     
