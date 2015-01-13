@@ -96,7 +96,10 @@ function _less_setting_form_element($system_name, $less_settings, $saved_setting
     ),
   );
 
-  $less_settings = array_replace($less_settings, (array) module_invoke($system_name, 'less_variables'));
+  if (module_exists($system_name)) {
+
+    $less_settings = array_replace($less_settings, (array) module_invoke($system_name, 'less_variables'));
+  }
 
   foreach ($less_settings as $var_name => $var_value) {
     
