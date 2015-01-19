@@ -19,5 +19,5 @@ files[] = engines/engine.less_js.inc
 files[] = classes/class.lessjs.inc
 files[] = classes/class.lessautoprefixer.inc
 
-; Testing file
-;files[] = less.test
+; Testing files
+files[] = tests/less.test
