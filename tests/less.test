@@ -15,9 +15,10 @@ class LessUnitTest extends DrupalUnitTestCase {
 
   public function setUp() {
 
-    parent::setUp('less');
-
+    module_load_include('module', 'less');
     module_load_include('inc', 'less', 'includes/less.process');
+
+    parent::setUp();
   }
 
   /**
