@@ -77,9 +77,9 @@ class LessUnitTest extends DrupalUnitTestCase {
 }
 EOD;
 
-    $expected_rewritten_output_data = <<<'EOD'
+    $expected_rewritten_output_data = <<<EOD
 #less_demo_gradient .less_demo_logo {
-  background: transparent url(/sites/all/modules/custom/less/less_demo/images/logo.png) center center no-repeat;
+  background: transparent url({$GLOBALS['base_path']}sites/all/modules/custom/less/less_demo/images/logo.png) center center no-repeat;
 }
 EOD;
 
