@@ -1,0 +1,5 @@
+less.admin_settings:
+  title: 'Settings'
+  route_name: less.admin_settings
+  base_route: less.admin_settings
+  weight: 0
