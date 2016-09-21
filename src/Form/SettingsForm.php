@@ -75,6 +75,19 @@ class SettingsForm extends ConfigFormBase {
     /** @var \Drupal\Core\Config\Config $config */
     $config = $this->config('less.settings');
 
+    $form['clear_cache'] = array(
+      '#type' => 'details',
+      '#title' => t('Clear cache'),
+      '#open' => TRUE,
+    );
+
+    // TODO: Only clear relevant caches.
+    $form['clear_cache']['clear'] = array(
+      '#type' => 'submit',
+      '#value' => t('Clear all caches'),
+      '#submit' => array('::submitCacheClear'),
+    );
+
     $form['engine'] = [
       '#type' => 'radios',
       '#title' => $this->t('LESS engine'),
@@ -171,6 +184,15 @@ class SettingsForm extends ConfigFormBase {
       ->save();
 
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Clears the caches.
+   */
+  public function submitCacheClear(array &$form, FormStateInterface $form_state) {
+    // TODO: Only clear relevant caches.
+    drupal_flush_all_caches();
+    drupal_set_message(t('Caches cleared.'));
   }
 
 }
