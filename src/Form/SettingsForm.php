@@ -88,7 +88,7 @@ class SettingsForm extends ConfigFormBase {
 
       $form['engine'][$id] = array(
         '#type' => 'radio',
-        '#title' => t('@engine_name - <a href="@vendor_url">@vendor_url</a>', array('@engine_name' => $definition['title'], '@vendor_url' => $definition['url'])),
+        '#title' => $this->t('@engine_name - <a href="@vendor_url">@vendor_url</a>', array('@engine_name' => $definition['title'], '@vendor_url' => $definition['url'])),
         '#return_value' => $id,
         '#description' => t('Missing - Click vendor link above to read installation instructions.'),
         // '#disabled' => empty($definition['installed']),
@@ -103,7 +103,7 @@ class SettingsForm extends ConfigFormBase {
     $is_autoprefixer_installed = FALSE;
     $form['autoprefixer'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use @name - <a href="@vendor_url">@vendor_url</a>', array('@name' => 'Autoprefixer', '@vendor_url' => 'https://github.com/postcss/autoprefixer')),
+      '#title' => $this->t('Use @name - <a href="@vendor_url">@vendor_url</a>', array('@name' => 'Autoprefixer', '@vendor_url' => 'https://github.com/postcss/autoprefixer')),
       '#description' => t('Enable automatic prefixing of vendor CSS extensions.'),
       '#default_value' => $config->get('autoprefixer'),
       '#disabled' => !$is_autoprefixer_installed,
@@ -111,7 +111,7 @@ class SettingsForm extends ConfigFormBase {
 
     $form['developer_options'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Developer Options'),
+      '#title' => $this->t('Developer Options'),
       '#tree' => TRUE,
     );
 
@@ -119,12 +119,14 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('LESS developer mode'),
       '#description' => $this->t('Enable developer mode to ensure LESS files are regenerated every page load.'),
+      '#default_value' => $config->get('developer_options.devel'),
     ];
 
     $form['developer_options']['source_maps'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Source Maps'),
       '#description' => $this->t('Enable source maps output while "Developer Mode" is enabled.'),
+      '#default_value' => $config->get('developer_options.source_maps'),
       '#states' => array(
         'enabled' => array(
           ':input[name="developer_options[devel]"]' => array('checked' => TRUE),
@@ -136,6 +138,7 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Watch Mode'),
       '#description' => $this->t('Enable watch mode while developer mode is active to automatically reload styles when changes are detected, including changes to @import-ed files. Does not cause a page reload.'),
+      '#default_value' => $config->get('developer_options.watch_mode'),
       '#states' => array(
         'enabled' => array(
           ':input[name="developer_options[devel]"]' => array('checked' => TRUE),
@@ -146,7 +149,7 @@ class SettingsForm extends ConfigFormBase {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Submit'),
+      '#value' => $this->t('Submit'),
     ];
 
     return $form;
