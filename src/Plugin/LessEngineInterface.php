@@ -1,9 +1,13 @@
 <?php
 
+namespace Drupal\less\Plugin;
+
+use Drupal\Component\Plugin\PluginInspectionInterface;
+
 /**
- * Interface \LessEngineInterface
+ * Defines an interface for Less Engine plugins.
  */
-interface LessEngineInterface {
+interface LessEngineInterface extends PluginInspectionInterface {
 
   /**
    * Set list of lookup directories for @import statements.
@@ -60,7 +64,7 @@ interface LessEngineInterface {
    * @return string
    *   Plain CSS.
    *
-   * @throws Exception
+   * @throws \Exception
    *   Rethrows exception from implementation library.
    */
   public function compile();

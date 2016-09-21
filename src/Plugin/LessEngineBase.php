@@ -1,9 +1,13 @@
 <?php
 
+namespace Drupal\less\Plugin;
+
+use Drupal\Component\Plugin\PluginBase;
+
 /**
- * Class \LessEngine
+ * Base class for Less Engine plugins.
  */
-abstract class LessEngine implements LessEngineInterface {
+abstract class LessEngineBase extends PluginBase implements LessEngineInterface {
 
   /**
    * Path to the input .less file.
@@ -56,11 +60,17 @@ abstract class LessEngine implements LessEngineInterface {
   /**
    * Basic constructor.
    *
-   * Sets input_file_path property.
-   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
    * @param string $input_file_path
+   *   The path to the input .less file.
    */
-  public function __construct($input_file_path) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, $input_file_path) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->input_file_path = $input_file_path;
   }

@@ -1,0 +1,4 @@
+services:
+  plugin.manager.less_engine.processor:
+    class: Drupal\less\Plugin\LessEngineManager
+    parent: default_plugin_manager
