@@ -1,27 +1,40 @@
 <?php
 
+namespace Drupal\less\Plugin\LessEngine;
+
+use Drupal\Core\Annotation\Translation;
+use Drupal\less\Annotation\LessEngine;
+use Drupal\less\LessCliWrapper;
+use Drupal\less\Plugin\LessEngineBase;
+
+
 /**
- * Class \LessEngineLess_js
+ * Plugin for compiling using the official Leaner CSS CLI.
+ *
+ * @LessEngine(
+ *   id = "lessc",
+ *   title = @Translation("Leaner CSS CLI"),
+ *   description = @Translation("Convert .less files using the official lesscss.org CLI."),
+ *   url = "https://github.com/less/less.js"
+ * )
  */
-class LessEngineLess_js extends LessEngine {
+class Lessc extends LessEngineBase  {
 
   /**
-   * @var \Lessjs
+   * @var \Drupal\less\LessCliWrapper
    */
   private $less_js_parser;
 
   /**
    * Instantiates new instances of \Lessjs.
-   *
-   * @param string $input_file_path
-   *
    * @see \Lessjs
+   *
+   * @inheritdoc
    */
-  public function __construct($input_file_path) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, $input_file_path) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $input_file_path);
 
-    parent::__construct($input_file_path);
-
-    $this->less_js_parser = Lessjs::create($this->input_file_path);
+    $this->less_js_parser = LessCliWrapper::create($this->input_file_path);
   }
 
   /**
@@ -61,7 +74,7 @@ class LessEngineLess_js extends LessEngine {
 
       $compiled_styles = $this->less_js_parser->compile();
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
 
       throw $e;
     }
