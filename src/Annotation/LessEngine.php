@@ -5,7 +5,7 @@ namespace Drupal\less\Annotation;
 use Drupal\Component\Annotation\Plugin;
 
 /**
- * Defines a Less Engine item annotation object.
+ * Defines a LESS Engine item annotation object.
  *
  * @see \Drupal\less\Plugin\LessEngineManager
  * @see plugin_api
@@ -31,7 +31,16 @@ class LessEngine extends Plugin {
   public $title;
 
   /**
-   * A URL to the vendor homepage.
+   * The description of the plugin.
+   *
+   * @var \Drupal\Core\Annotation\Translation
+   *
+   * @ingroup plugin_translatable
+   */
+  public $description;
+
+  /**
+   * The URL of the vendor homepage.
    *
    * @var string
    */
