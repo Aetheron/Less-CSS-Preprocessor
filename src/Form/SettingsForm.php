@@ -100,6 +100,15 @@ class SettingsForm extends ConfigFormBase {
       }
     }
 
+    $is_autoprefixer_installed = FALSE;
+    $form['autoprefixer'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use @name - <a href="@vendor_url">@vendor_url</a>', array('@name' => 'Autoprefixer', '@vendor_url' => 'https://github.com/postcss/autoprefixer')),
+      '#description' => t('Enable automatic prefixing of vendor CSS extensions.'),
+      '#default_value' => $config->get('autoprefixer'),
+      '#disabled' => !$is_autoprefixer_installed,
+    );
+
     $form['developer_options'] = array(
       '#type' => 'fieldset',
       '#title' => t('Developer Options'),
@@ -152,6 +161,7 @@ class SettingsForm extends ConfigFormBase {
 
     $config
       ->set('engine', $form_state->getValue('engine'))
+      ->set('autoprefixer', $form_state->getValue('autoprefixer'))
       ->set('developer_options.devel', $form_state->getValue(['developer_options', 'devel']))
       ->set('developer_options.source_maps', $form_state->getValue(['developer_options', 'source_maps']))
       ->set('developer_options.watch_mode', $form_state->getValue(['developer_options', 'watch_mode']))
