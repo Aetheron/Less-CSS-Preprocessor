@@ -3,16 +3,11 @@
 namespace Drupal\less;
 
 /**
- * @file
- * Contains 'lessjs' class; an abstraction layer for command line less.js.
- */
-
-/**
  * An abstraction layer for command line less.js binary.
  *
  * @see https://github.com/less/less.js
  */
-class Lessjs {
+class LessCliWrapper {
 
   /**
    * Base command is hardcoded here to reduce security vulnerability.
