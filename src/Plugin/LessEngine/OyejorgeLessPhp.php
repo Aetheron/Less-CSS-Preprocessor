@@ -1,10 +1,23 @@
 <?php
 
-/**
- * Class \LessEngineLess_php
- */
-class LessEngineLess_php extends LessEngine {
+namespace Drupal\less\Plugin\LessEngine;
 
+use Drupal\Core\Annotation\Translation;
+use Drupal\less\Annotation\LessEngine;
+use Drupal\less\Plugin\LessEngineBase;
+
+
+/**
+ * Plugin for compiling using the official Leaner CSS CLI.
+ *
+ * @LessEngine(
+ *   id = "oyejorge_less_php",
+ *   title = @Translation("oyejorge/less.php"),
+ *   description = @Translation("A PHP port that is closer to canonical spec from lesscss.org."),
+ *   url = "https://github.com/oyejorge/less.php"
+ * )
+ */
+class OyejorgeLessPhp extends LessEngineBase  {
   /**
    * @var \Less_Parser
    */
@@ -13,15 +26,12 @@ class LessEngineLess_php extends LessEngine {
   /**
    * Instantiates new instances of \Less_Parser.
    *
-   * @param string $input_file_path
-   *
-   * @see \Less_Parser
+   * @inheritdoc
    */
-  public function __construct($input_file_path) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, $input_file_path) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $input_file_path);
 
-    parent::__construct($input_file_path);
-
-    $this->less_php_parser = new Less_Parser();
+    $this->less_php_parser = new \Less_Parser();
   }
 
   /**
@@ -53,11 +63,12 @@ class LessEngineLess_php extends LessEngine {
 
       $this->dependencies = $this->less_php_parser->AllParsedFiles();
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
 
       throw $e;
     }
 
     return $compiled_styles;
   }
+
 }
