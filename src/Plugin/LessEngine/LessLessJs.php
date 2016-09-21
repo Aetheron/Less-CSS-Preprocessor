@@ -12,13 +12,13 @@ use Drupal\less\Plugin\LessEngineBase;
  * Plugin for compiling using the official Leaner CSS CLI.
  *
  * @LessEngine(
- *   id = "lessc",
- *   title = @Translation("Leaner CSS CLI"),
- *   description = @Translation("Convert .less files using the official lesscss.org CLI."),
+ *   id = "less_less_js",
+ *   title = @Translation("less/less.js"),
+ *   description = @Translation("Convert files using the official lesscss.org JavaScript CLI."),
  *   url = "https://github.com/less/less.js"
  * )
  */
-class Lessc extends LessEngineBase  {
+class LessLessJs extends LessEngineBase  {
 
   /**
    * @var \Drupal\less\LessCliWrapper
