@@ -102,7 +102,7 @@ function _less_setting_form_element($system_name, $less_settings, $saved_setting
   }
 
   foreach ($less_settings as $var_name => $var_value) {
-    
+
     $form[$var_name] = array(
       '#type' => 'textfield',
       '#title' => $var_name,
@@ -111,6 +111,6 @@ function _less_setting_form_element($system_name, $less_settings, $saved_setting
       '#attributes' => array('placeholder' => $var_value),
     );
   }
-  
+
   return $form;
 }

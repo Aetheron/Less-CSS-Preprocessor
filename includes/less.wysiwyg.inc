@@ -39,7 +39,7 @@ function less_wysiwyg_editor_settings_alter(&$settings, $context) {
     $styles = array(
       '#items' => array(),
     );
-    
+
     foreach ($stylesheets as $stylesheet) {
 
       // Might contain ?query portion, separate parts.

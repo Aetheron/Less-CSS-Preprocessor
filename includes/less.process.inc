@@ -13,7 +13,7 @@
  * @param string  $key
  */
 function _less_attach_settings(&$item, $key) {
-  
+
   $defaults = array(
     'less' => less_get_settings(), // Bare defaults for LESS.
   );
@@ -25,21 +25,21 @@ function _less_attach_settings(&$item, $key) {
       'build_required' => NULL,
     ),
   );
-  
+
   // Merge in any info from $item.
   $item = array_replace_recursive($defaults, $item, $nullify);
-  
+
   $item['less']['input_file'] = $item['data'];
-  
+
   $less_settings = less_get_settings(_less_file_owner($item['less']['input_file']));
-  
+
   // array_replace_recursive() works on keys, flip to not use numeric keys.
   $less_settings['paths'] = array_flip($less_settings['paths']);
   $item['less']['paths'] = array_flip($item['less']['paths']);
-  
+
   // Merge defaults with any per file settings.
   $item['less'] = array_replace_recursive($less_settings, $item['less']);
-  
+
   // First array_flips before merge removed duplicates, so just flip back.
   $item['less']['paths'] = array_flip($item['less']['paths']);
 }
@@ -53,12 +53,12 @@ function _less_attach_settings(&$item, $key) {
 function _less_output_path(&$item, $key) {
 
   $input_file = $item['less']['input_file'];
-  
+
   $less_settings = $item['less'];
-  
+
   // array_multisort() the data so that the hash returns the same hash regardless order of data.
   array_multisort($less_settings);
-  
+
   $output_path_array = array(
     '!less_output_dir' => LESS_DIRECTORY,
     // Strip '.css' extension of filenames following the RTL extension pattern.
@@ -66,9 +66,9 @@ function _less_output_path(&$item, $key) {
     // drupal_json_encode() is used because serialize() throws an error with lambda functions.
     '!settings_hash' => drupal_hash_base64(drupal_json_encode($less_settings)),
   );
-  
+
   $output_path = format_string('!less_output_dir/!input_file_basename.!settings_hash.css', $output_path_array);
-  
+
   $item['less']['output_file'] = $output_path;
 }
 
@@ -79,17 +79,17 @@ function _less_output_path(&$item, $key) {
  * @param string  $key
  */
 function _less_check_build(&$item, $key) {
-  
+
   $input_file = $item['less']['input_file'];
 
   $build_required = FALSE;
-  
+
   // Set $rebuild if this file or its children have been modified.
   if ($less_file_cache = cache_get('less:devel:' . drupal_hash_base64($input_file))) {
-    
+
     // Iterate over each file and check if there are any changes.
     foreach ($less_file_cache->data as $filepath => $filemtime) {
-      
+
       // Only rebuild if there has been a change to a file.
       if (is_file($filepath) && filemtime($filepath) > $filemtime) {
         $build_required = TRUE;
@@ -98,11 +98,11 @@ function _less_check_build(&$item, $key) {
     }
   }
   else {
-    
+
     // No cache data, force a rebuild for later comparison.
     $build_required = TRUE;
   }
-  
+
   $item['less']['build_required'] = $build_required;
 }
 
@@ -117,10 +117,10 @@ function _less_check_build(&$item, $key) {
 function _less_process_file(&$item, $key) {
 
   $less_settings = $item['less'];
-  
+
   // $output_file doesn't exist or is flagged for build.
   if (!is_file($item['less']['output_file']) || !empty($item['less']['build_required'])) {
-    
+
     $output_data = NULL;
 
     try {
@@ -158,7 +158,7 @@ function _less_process_file(&$item, $key) {
     }
 
     if (isset($output_data)) {
-      
+
       // Fix paths for images as .css is in different location.
       $output_data = _less_rewrite_paths($item['less']['input_file'], $output_data);
 
@@ -168,9 +168,9 @@ function _less_process_file(&$item, $key) {
         file_unmanaged_save_data($output_data, $item['less']['output_file'], FILE_EXISTS_REPLACE);
       }
     }
-    
+
     if (is_file($item['less']['output_file']) && $item['less'][LESS_AUTOPREFIXER]) {
-      
+
       if (($lessautoprefixer_library = libraries_load('lessautoprefixer')) && $lessautoprefixer_library['installed']) {
 
         try {
@@ -195,7 +195,7 @@ function _less_process_file(&$item, $key) {
   }
 
   if (is_file($item['less']['output_file'])) {
-    
+
     // Set render path of the stylesheet to the compiled output.
     $item['data'] = $item['less']['output_file'];
   }
@@ -206,16 +206,16 @@ function _less_process_file(&$item, $key) {
  * @param string  $key
  */
 function _less_store_cache_info(&$item, $key) {
-  
+
   // Only match when output_file exists.
   if ($item['data'] === $item['less']['output_file']) {
-    
+
     $less_watch_cache = $item;
-    
+
     $less_watch_cache['data'] = $item['less']['input_file'];
-    
+
     cache_set('less:watch:' . drupal_hash_base64(file_create_url($item['less']['output_file'])), $less_watch_cache);
-    
+
     // 'preprocess' being FALSE generates a discreet <link /> rather than an @import.
     $item['preprocess'] = FALSE;
   }
@@ -223,7 +223,7 @@ function _less_store_cache_info(&$item, $key) {
 
 /**
  * Normalize keeping track of changed files.
- * 
+ *
  * @param string $input_file
  *   Path of source file.
  * @param string[] $dependencies
@@ -233,21 +233,21 @@ function _less_cache_dependencies($input_file, $dependencies = array()) {
 
   // Add $input_file to $dependencies as it is not in return from some engines.
   $dependencies = array_merge(array($input_file), (array) $dependencies);
-  
+
   $watched_files = array();
-  
+
   foreach ($dependencies as $dependency) {
-    
+
     // Full path on file should enforce uniqueness in associative array.
     $watched_files[drupal_realpath($dependency)] = filemtime($dependency);
   }
-  
+
   cache_set('less:devel:' . drupal_hash_base64($input_file), $watched_files);
 }
 
 /**
  * Copied functionality from drupal_build_css_cache() for our own purposes.
- * 
+ *
  * This function processes $contents and rewrites relative paths to be absolute
  * from web root. This is mainly used to ensure that compiled .less files still
  * reference images at their original paths.
@@ -257,12 +257,12 @@ function _less_cache_dependencies($input_file, $dependencies = array()) {
  *
  * @return string
  *   Processed styles with replaced paths.
- * 
+ *
  * @see drupal_build_css_cache()
  */
 function _less_rewrite_paths($input_filepath, $contents) {
   $output = '';
-  
+
   // Build the base URL of this CSS file: start with the full URL.
   $css_base_url = file_create_url($input_filepath);
   // Move to the parent.
@@ -272,10 +272,10 @@ function _less_rewrite_paths($input_filepath, $contents) {
   if (substr($css_base_url, 0, strlen($GLOBALS['base_root'])) == $GLOBALS['base_root']) {
     $css_base_url = substr($css_base_url, strlen($GLOBALS['base_root']));
   }
-  
+
   _drupal_build_css_path(NULL, $css_base_url . '/');
   // Anchor all paths in the CSS with its base URL, ignoring external and absolute paths.
   $output .= preg_replace_callback('/url\(\s*[\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\s*\)/i', '_drupal_build_css_path', $contents);
-  
+
   return $output;
 }
