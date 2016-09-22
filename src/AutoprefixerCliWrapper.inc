@@ -1,14 +1,11 @@
 <?php
 
 /**
- * @file
- * Contains 'LessAutoprefixer' class; an abstraction layer for command line Autoprefixer.
+ * An abstraction layer for command line Autoprefixer.
+ *
+ * @see https://github.com/postcss/autoprefixer
  */
-
-/**
- * 'Autoprefixer' class.
- */
-class LessAutoprefixer {
+class AutoprefixerCliWrapper {
 
   // Base command is hardcoded here to reduce security vulnerability.
   const BASE_COMMAND = 'autoprefixer';
@@ -18,7 +15,7 @@ class LessAutoprefixer {
   protected $source_maps_enabled = FALSE;
 
   /**
-   * Constructor function for 'LessAutoprefixer'.
+   * Constructor function for 'AutoprefixerCliWrapper'.
    *
    * @param string $input_file
    *   Path for .less file relative to getcwd().
@@ -31,7 +28,7 @@ class LessAutoprefixer {
   /**
    * @param string $input_file
    *
-   * @return LessAutoprefixer
+   * @return AutoprefixerCliWrapper
    */
   public static function create($input_file) {
 
