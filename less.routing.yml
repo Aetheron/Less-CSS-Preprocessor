@@ -5,3 +5,11 @@ less.admin_settings:
     _title: 'LESS settings'
   requirements:
     _permission: 'administer less'
+
+less.watch_controller:
+  path: '/ajax/less/watch'
+  defaults:
+    _controller: '\Drupal\less\Controller\LessWatchController::watch'
+    _title: 'LESS watch'
+  requirements:
+    _permission: 'administer less'
