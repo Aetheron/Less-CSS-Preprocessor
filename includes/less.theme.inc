@@ -71,11 +71,6 @@ function less_form_alter(&$form, &$form_state, $form_id) {
           '#prefix' => t('<h3>LESS settings</h3>'),
           '#tree' => TRUE,
           '#description' => t('These settings are per theme. Delete a value to use the default.'),
-          '#attached' => array(
-            'css' => array(
-              drupal_get_path('module', 'less') . '/styles/less.theme.css',
-            ),
-          ),
         );
 
         $form['less'] += $less_settings_form;
