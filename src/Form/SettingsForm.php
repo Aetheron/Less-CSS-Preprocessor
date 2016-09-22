@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SettingsForm extends ConfigFormBase {
 
   /**
-   * LES Engine Plugin Manager.
+   * LESS Engine Plugin Manager.
    *
    * @var \Drupal\devel\DevelDumperPluginManager
    */
