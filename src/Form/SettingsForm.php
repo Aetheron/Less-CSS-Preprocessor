@@ -103,7 +103,7 @@ class SettingsForm extends ConfigFormBase {
         '#type' => 'radio',
         '#title' => $this->t('@engine_name - <a href="@vendor_url">@vendor_url</a>', array('@engine_name' => $definition['title'], '@vendor_url' => $definition['url'])),
         '#return_value' => $id,
-        '#description' => t('Missing - Click vendor link above to read installation instructions.'),
+        '#description' => $definition['description'],
         // '#disabled' => empty($definition['installed']),
       );
 
