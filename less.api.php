@@ -55,21 +55,6 @@ function hook_less_variables_alter(array &$less_variables, $system_name) {
 }
 
 /**
- * Alter LESS variables provided by other modules or themes.
- *
- * This is called after hook_less_variables_alter().
- *
- * @param &string[] $less_variables
- *   Flat associative array of variables, where key is variable name.
- *
- * @see hook_less_variables()
- * @see hook_less_variables_alter()
- */
-function hook_less_variables_SYSTEM_NAME_alter(array &$less_variables) {
-  $less_variables['@variable_name_2'] = 'lighten(@variable_name_1, 20%)';
-}
-
-/**
  * Provide a list of lookup paths for @import statements in .less files.
  *
  * @return string[]
@@ -90,15 +75,6 @@ function hook_less_paths_alter(array &$less_paths, $system_name) {
   if ($system_name === 'less_demo') {
     $less_paths[] = drupal_get_path('module', 'less_demo') . '/other_path';
   }
-}
-
-/**
- * Alter LESS include paths for specific module/theme.
- *
- * @param &string[] $less_paths
- */
-function hook_less_paths_SYSTEM_NAME_alter(array &$less_paths) {
-
 }
 
 /**
