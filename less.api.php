@@ -55,11 +55,11 @@ function hook_less_variables_alter(array &$less_variables, $system_name) {
 }
 
 /**
- * Provide a list of lookup paths for @import statements in .less files.
+ * Provide a list of lookup directories for @import statements in .less files.
  *
  * @return string[]
  */
-function hook_less_paths() {
+function hook_less_import_directories() {
   return array(
     drupal_get_path('module', 'less_demo') . '/libs',
   );
@@ -68,12 +68,12 @@ function hook_less_paths() {
 /**
  * Alter LESS include paths.
  *
- * @param &string[]  $less_paths
+ * @param &string[]  $import_directories
  * @param string     $system_name
  */
-function hook_less_paths_alter(array &$less_paths, $system_name) {
+function hook_less_import_directories_alter(array &$import_directories, $system_name) {
   if ($system_name === 'less_demo') {
-    $less_paths[] = drupal_get_path('module', 'less_demo') . '/other_path';
+    $import_directories[] = drupal_get_path('module', 'less_demo') . '/other_path';
   }
 }
 
