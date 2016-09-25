@@ -41,17 +41,12 @@ function hook_less_variables() {
  *
  * @param &string[] $less_variables
  *   Flat associative array of variables, where key is variable name.
- * @param string    $system_name
- *   A string of the system_name of the module or theme that this applies to.
  *
  * @see hook_less_variables()
  * @see hook_less_variables_SYSTEM_NAME_alter()
  */
-function hook_less_variables_alter(array &$less_variables, $system_name) {
-
-  if ($system_name === 'less_demo') {
-    $less_variables['@variable_name_1'] = '#ddd';
-  }
+function hook_less_variables_alter(array &$variables) {
+  $variables['@variable_name_1'] = '#ddd';
 }
 
 /**
@@ -69,12 +64,9 @@ function hook_less_import_directories() {
  * Alter LESS include paths.
  *
  * @param &string[]  $import_directories
- * @param string     $system_name
  */
-function hook_less_import_directories_alter(array &$import_directories, $system_name) {
-  if ($system_name === 'less_demo') {
-    $import_directories[] = drupal_get_path('module', 'less_demo') . '/other_path';
-  }
+function hook_less_import_directories_alter(array &$import_directories) {
+  $import_directories[] = drupal_get_path('module', 'less_demo') . '/other_path';
 }
 
 /**
