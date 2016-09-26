@@ -99,24 +99,29 @@ class SettingsForm extends ConfigFormBase {
     foreach ($this->engineManager->getDefinitions() as $id => $definition) {
       $form['engine']['#options'][$id] = $definition['title'];
 
+      $version = call_user_func([$definition['class'], 'getVersion']);
+      $title = $this->t('@title - <a href=":url" target="_blank">:url</a>', [
+        '@title' => $definition['title'],
+        ':url' => $definition['url']
+      ]);
+
       $form['engine'][$id] = array(
         '#type' => 'radio',
-        '#title' => $this->t('@engine_name - <a href="@vendor_url">@vendor_url</a>', array('@engine_name' => $definition['title'], '@vendor_url' => $definition['url'])),
+        '#title' => $title,
         '#return_value' => $id,
         '#description' => $definition['description'],
-        // '#disabled' => empty($definition['installed']),
+        '#disabled' => empty($version),
       );
 
-      // TODO: Make this work!
-      if (!empty($definition['version'])) {
-        $form['engine'][$id]['#description'] = t('Installed: %version', array('%version' => $definition['version']));
+      if (!empty($version)) {
+        $form['engine'][$id]['#description'] .= ' <b>' . t('Installed version: @version', array('@version' => $version)) . '</b>';
       }
     }
 
     $is_autoprefixer_installed = FALSE;
     $form['autoprefixer'] = array(
       '#type' => 'checkbox',
-      '#title' => $this->t('Use @name - <a href="@vendor_url">@vendor_url</a>', array('@name' => 'Autoprefixer', '@vendor_url' => 'https://github.com/postcss/autoprefixer')),
+      '#title' => $this->t('Use @name - <a href=":url">:url</a>', array('@name' => 'Autoprefixer', ':url' => 'https://github.com/postcss/autoprefixer')),
       '#description' => t('Enable automatic prefixing of vendor CSS extensions.'),
       '#default_value' => $config->get('autoprefixer'),
       '#disabled' => !$is_autoprefixer_installed,
