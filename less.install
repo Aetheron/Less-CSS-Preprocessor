@@ -4,21 +4,19 @@
  * @file
  * Install, update, and uninstall functions for the less module.
  */
- 
+
 /**
  * Implements hook_uninstall().
  */
 function less_uninstall() {
-  
-  variable_del('less_engine');
-  
-  variable_del(LESS_DEVEL);
-  variable_del(LESS_WATCH);
-  variable_del(LESS_SOURCE_MAPS);
-  
-  variable_del('less_dir');
-  
-  cache_clear_all('less:', 'cache', TRUE);
+  /** @var \Drupal\Core\File\FileSystemInterface $fileSystem */
+  $fileSystem = \Drupal::service('file_system');
+
+  // Delete cached css files.
+  $fileSystem->rmdir('public://less');
+
+  // Delete state for cached css files.
+  \Drupal::state()->delete('less_css_cache_files');
 }
 
 /**
@@ -26,46 +24,52 @@ function less_uninstall() {
  */
 function less_requirements($phase) {
   $requirements = array();
-  
-  $t = get_t();
-  
+
   switch ($phase) {
     case 'runtime':
-      
-      $less_engine_loaded = _less_inc();
+      /** @var \Drupal\less\Plugin\LessEngineManager $engineManager */
+      $engineManager = \Drupal::service('plugin.manager.less_engine');
 
-      if (!empty($less_engine_loaded)) {
-        
-        $loaded_engine = libraries_detect($less_engine_loaded);
-        
-        $requirements['less_version'] = array(
-          'title' => $t('LESS'),
-          'value' => $loaded_engine['name'] . ' - v' . $loaded_engine['version'],
-          'description' => $t('To check for newer versions go to <a href="@vendor_url" target="_blank">@vendor_url</a>.', array('@vendor_url' => $loaded_engine['vendor url'])),
+      /** @var \Drupal\Core\Config\Config $config */
+      $config = \Drupal::service('config.factory')->get('less.settings');
+
+      $pluginId = $config->get('engine');
+      $pluginDefinition = $engineManager->getDefinition($pluginId);
+
+      if (!empty($pluginDefinition)) {
+        $less_version_info = t('@title, version @version', [
+          '@title' => $pluginDefinition['title'],
+          '@version' => call_user_func([$pluginDefinition['class'], 'getVersion'])
+        ]);
+        $requirements['less_engine'] = array(
+          'title' => t('LESS CSS Preprocessor'),
+          'value' => $less_version_info,
+          'description' => t('To check for newer versions go to <a href=":url" target="_blank">:url</a>.', array(':url' => $pluginDefinition['url'])),
           'severity' => REQUIREMENT_OK,
         );
       }
       else {
-        $requirements['less_library'] = array(
-          'title' => $t('LESS'),
+        $requirements['less_engine'] = array(
+          'title' => t('LESS CSS Preprocessor'),
           'value' => '',
-          'description' => $t('A LESS library was not detected. Please follow the instructions on the <a href="!url" target="_blank">LESS project page</a> to install the a LESS library.', array("!url" => url('https://drupal.org/project/less'))),
+          'description' => t('A LESS library was not detected. Please follow the instructions on the <a href=":url" target="_blank">LESS project page</a> to install the a LESS library.', array(':url' => 'https://drupal.org/project/less')),
           'severity' => REQUIREMENT_ERROR,
         );
       }
-      if (variable_get(LESS_DEVEL, FALSE)) {
-        $requirements[LESS_DEVEL] = array(
+
+      if ($config->get('developer_options.devel')) {
+        $requirements['less_devel_mode'] = array(
           'title' => 'LESS developer mode',
-          'value' => $t('Enabled'),
-          'description' => $t('LESS files are being checked on every request. Remember to <a href="!url">turn off</a> this feature on production websites.', array("!url" => url('admin/config/development/less'))),
+          'value' => t('Enabled'),
+          'description' => t('LESS files are being created on every request. Remember to <a href=":url">turn off</a> this feature on production websites.', [':url' => \Drupal\Core\Url::fromRoute('less.admin_settings')->toString()]),
           'severity' => REQUIREMENT_WARNING,
         );
       }
       break;
-      
+
     default:
       break;
   }
-  
+
   return $requirements;
 }
