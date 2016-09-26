@@ -21,20 +21,13 @@ use Drupal\less\Plugin\LessEngineBase;
 class LessLessJs extends LessEngineBase  {
 
   /**
-   * @var \Drupal\less\LessCliWrapper
-   */
-  private $less_js_parser;
-
-  /**
    * Instantiates new instances of \Lessjs.
    * @see \Lessjs
    *
    * @inheritdoc
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, $input_file_path) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $input_file_path);
-
-    $this->less_js_parser = LessCliWrapper::create($this->input_file_path);
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
@@ -47,38 +40,44 @@ class LessLessJs extends LessEngineBase  {
    */
   public function getDependencies() {
 
-    $this->dependencies = $this->less_js_parser->depends();
+    // $this->dependencies = $this->parser->depends();
 
     return parent::getDependencies();
   }
 
   /**
-   * {@inheritdoc}
    * This compiles using engine specific function calls.
+   *
+   * {@inheritdoc}
    */
   public function compile() {
-
     $compiled_styles = NULL;
 
+    $parser = LessCliWrapper::create($this->configuration['source_path']);
     try {
-
-      $this->less_js_parser->source_maps($this->source_maps_enabled, $this->source_maps_base_path, $this->source_maps_root_path);
+      $parser->source_maps($this->source_maps_enabled, $this->source_maps_base_path, $this->source_maps_root_path);
 
       foreach ($this->import_directories as $directory) {
-        $this->less_js_parser->include_path($directory);
+        $parser->include_path($directory);
       }
 
       foreach ($this->variables as $var_name => $var_value) {
-        $this->less_js_parser->modify_var(trim($var_name, '@'), trim($var_value, ';'));
+        $parser->modify_var(trim($var_name, '@'), trim($var_value, ';'));
       }
 
-      $compiled_styles = $this->less_js_parser->compile();
+      $compiled_styles = $parser->compile();
     }
     catch (\Exception $e) {
-
       throw $e;
     }
 
     return $compiled_styles;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  static public function getVersion() {
+    return LessCliWrapper::version();
   }
 }

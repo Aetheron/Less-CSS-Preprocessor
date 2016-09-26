@@ -18,57 +18,62 @@ use Drupal\less\Plugin\LessEngineBase;
  * )
  */
 class OyejorgeLessPhp extends LessEngineBase  {
-  /**
-   * @var \Less_Parser
-   */
-  private $less_php_parser;
 
   /**
    * Instantiates new instances of \Less_Parser.
    *
    * @inheritdoc
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, $input_file_path) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $input_file_path);
-
-    $this->less_php_parser = new \Less_Parser();
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
-   * {@inheritdoc}
    * This compiles using engine specific function calls.
+   *
+   * {@inheritdoc}
    */
   public function compile() {
-
     $compiled_styles = NULL;
 
+    $parser = new \Less_Parser();
     try {
 
       if ($this->source_maps_enabled) {
 
-        $this->less_php_parser->SetOption('sourceMap', $this->source_maps_enabled);
+        $parser->SetOption('sourceMap', $this->source_maps_enabled);
 
-        $this->less_php_parser->SetOption('sourceMapBasepath', $this->source_maps_base_path);
-        $this->less_php_parser->SetOption('sourceMapRootpath', $this->source_maps_root_path);
+        $parser->SetOption('sourceMapBasepath', $this->source_maps_base_path);
+        $parser->SetOption('sourceMapRootpath', $this->source_maps_root_path);
       }
 
       // Less.js does not allow path aliasing. Set aliases to blank for consistency.
-      $this->less_php_parser->SetImportDirs(array_fill_keys($this->import_directories, ''));
+      $parser->SetImportDirs(array_fill_keys($this->import_directories, ''));
 
-      $this->less_php_parser->parseFile($this->input_file_path);
+      $parser->parseFile($this->configuration['source_path']);
 
-      $this->less_php_parser->ModifyVars($this->variables);
+      $parser->ModifyVars($this->variables);
 
-      $compiled_styles = $this->less_php_parser->getCss();
+      $compiled_styles = $parser->getCss();
 
-      $this->dependencies = $this->less_php_parser->AllParsedFiles();
+      $this->dependencies = $parser->AllParsedFiles();
     }
     catch (\Exception $e) {
-
       throw $e;
     }
 
     return $compiled_styles;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  static public function getVersion() {
+    if (class_exists('\Less_Version')) {
+      return \Less_Version::version;
+    }
+
+    return NULL;
   }
 
 }
