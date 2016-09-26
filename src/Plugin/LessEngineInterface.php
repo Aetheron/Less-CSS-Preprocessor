@@ -10,6 +10,28 @@ use Drupal\Component\Plugin\PluginInspectionInterface;
 interface LessEngineInterface extends PluginInspectionInterface {
 
   /**
+   * Set the path to the file that will be compiled.
+   *
+   * @param string $path
+   *    Path to the file that will be compiled.
+   */
+  public function setSource($path);
+
+  /**
+   * Gets the uri to the compiled file.
+   *
+   * @return string
+   */
+  public function getDestinationUri();
+
+  /**
+   * Checks whether the source file is compiled or not.
+   *
+   * @return boolean
+   */
+  public function destinationExists();
+
+  /**
    * Set list of lookup directories for @import statements.
    *
    * @param string[] $directories
@@ -68,4 +90,11 @@ interface LessEngineInterface extends PluginInspectionInterface {
    *   Rethrows exception from implementation library.
    */
   public function compile();
+
+  /**
+   * Returns the version of the installed engine or null.
+   *
+   * @return string|null
+   */
+  static public function getVersion();
 }

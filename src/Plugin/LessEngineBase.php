@@ -10,13 +10,6 @@ use Drupal\Component\Plugin\PluginBase;
 abstract class LessEngineBase extends PluginBase implements LessEngineInterface {
 
   /**
-   * Path to the input .less file.
-   *
-   * @var string
-   */
-  protected $input_file_path;
-
-  /**
    * This will get populated with a list of files that $input_file_path depended
    * on through @import statements.
    *
@@ -58,21 +51,48 @@ abstract class LessEngineBase extends PluginBase implements LessEngineInterface 
   protected $source_maps_root_path = NULL;
 
   /**
-   * Basic constructor.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param string $input_file_path
-   *   The path to the input .less file.
+   * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, $input_file_path) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function setSource($path) {
+    if (empty($path)) {
+      throw new \InvalidArgumentException('No source file path given.');
+    }
 
-    $this->input_file_path = $input_file_path;
+    if (!file_exists($path)) {
+      throw new \InvalidArgumentException('Source file does not exist.');
+    }
+
+    // Set the source file path.
+    $this->configuration['source_path'] = $path;
+
+    // Prepare a relative directory path for the destination file.
+    $destination_sub_path = substr($path, 0, -5);  // Remove the '.less' extension.
+    if (substr($destination_sub_path, -4) == '.css') {
+      $destination_sub_path = substr($destination_sub_path, 0, -4);  // Remove '.css' extension if it exists.
+    }
+
+    // Create full path to the destination file.
+    $cache_id = \Drupal::state()->get('system.css_js_query_string');
+    $destination_uri = 'public://less/' . $cache_id . '/' . $destination_sub_path . '.css';
+    $this->configuration['destination_uri'] = $destination_uri;
+  }
+
+  public function getDestinationUri() {
+    return $this->configuration['destination_uri'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function destinationExists() {
+    /** @var \Drupal\Core\File\FileSystemInterface $fileSystem */
+    $fileSystem = \Drupal::service('file_system');
+
+    if (file_exists($fileSystem->realpath($this->configuration['destination_uri']))) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -108,9 +128,4 @@ abstract class LessEngineBase extends PluginBase implements LessEngineInterface 
 
     return $this->dependencies;
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  abstract public function compile();
 }
