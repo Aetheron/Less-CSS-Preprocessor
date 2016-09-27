@@ -25,6 +25,18 @@ interface LessEngineInterface extends PluginInspectionInterface {
   public function getDestinationUri();
 
   /**
+   * Gets the file to the compiled file as required by \Drupal\Core\Asset\AssetResolver.
+   *
+   * @see \Drupal\Core\Asset\AssetResolver
+   *
+   * @param string $uri
+   *    URI of the file that will be compiled.
+   *
+   * @return string
+   */
+  static public function uriToRelativePath($uri);
+
+  /**
    * Checks whether the source file is compiled or not.
    *
    * @return boolean

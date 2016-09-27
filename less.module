@@ -30,9 +30,10 @@ function less_css_alter(&$css, AttachedAssetsInterface $assets) {
   foreach ($css AS &$style) {
     if ($style['type'] == 'file' && substr($style['data'], -5) == '.less') {
       $source_file_path = $style['data'];
-      if ($compiled_file_path = _less_css_alter_entry($style)) {
+      if ($compiled_file_info = _less_process_file($source_file_path)) {
         // Save the state after each change.
-        $map[$source_file_path] = $compiled_file_path;
+        $style['data'] = $compiled_file_info['destination_file_path'];
+        $map[$source_file_path] = $compiled_file_info['destination_file_path'];
         \Drupal::state()->set('less_css_cache_files', $map);
       }
     }
@@ -42,13 +43,16 @@ function less_css_alter(&$css, AttachedAssetsInterface $assets) {
 /**
  * Helper function for hook_css_alter().
  *
- * @param array $css_entry
- *    A LESS item that need to be compiled to CSS.
+ * @param string $source_file_path
+ *    A relative path to the source file.
  *
- * @return null|string
- *    A path to the compiled CSS file or NULL.
+ * @param bool $process_only
+ *    Whether or not to just compile the file. Used in devel mode.
+ *
+ * @return array|null
+ *    Information about the compiled CSS or NULL.
  */
-function _less_css_alter_entry(&$css_entry) {
+function _less_process_file($source_file_path, $process_only = FALSE) {
   /** @var \Drupal\Core\Config\Config $config */
   $config = \Drupal::service('config.factory')->get('less.settings');
 
@@ -61,19 +65,20 @@ function _less_css_alter_entry(&$css_entry) {
   /** @var \Drupal\less\Plugin\LessEngineInterface $engine */
   $engine = $engineManager->createEngine();
 
-  $source_file_path = $css_entry['data'];
   $engine->setSource($source_file_path);
 
   // If the file does not exist, process the original LESS file and output
   // the data into the temporary file.
-  if (!$engine->destinationExists() && !$config->get('developer_options.devel')) {
+  $computed_style = NULL;
+  $create_destination_file = !$engine->destinationExists() && !$config->get('developer_options.devel');
+  if ($create_destination_file || $process_only) {
     if ($config->get('developer_options.devel')) {
-      $engine->setSourceMaps($this->config->get('developer_options.source_maps'), DRUPAL_ROOT, base_path());
+      $engine->setSourceMaps($config->get('developer_options.source_maps'), DRUPAL_ROOT, base_path());
     }
 
     // Build the destination folder tree if it doesn't already exist.
     $directory = $fileSystem->dirname($engine->getDestinationUri());
-    if (!file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+    if (!$process_only && !file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       throw new \RuntimeException(sprintf('Unable to create the storage directory (%s).', $directory));
     }
 
@@ -87,11 +92,10 @@ function _less_css_alter_entry(&$css_entry) {
       $engine->modifyVariables($less_variables);
     }
 
-    $computed_style = NULL;
     try {
       $computed_style = $engine->compile();
 
-      // Fix paths for images as .css is in different location.
+      // Fix paths for images as the .css is in different location.
       $css_optimizer = new CssOptimizer();
 
       // Return the path to where this CSS file originated from, stripping
@@ -99,13 +103,16 @@ function _less_css_alter_entry(&$css_entry) {
       $css_optimizer->rewriteFileURIBasePath = base_path() . dirname($source_file_path) . '/';
 
       // Convert all relative paths with absolute paths.
-      $computed_style = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', array($css_optimizer, 'rewriteFileURI'), $computed_style);
-    }
-    catch (\Exception $exception) {
+      $computed_style = preg_replace_callback(
+        '/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i',
+        array($css_optimizer, 'rewriteFileURI'),
+        $computed_style
+      );
+    } catch (\Exception $exception) {
       watchdog_exception('less', $exception, $exception->getMessage(), [], 'error');
     }
 
-    if (isset($computed_style)) {
+    if (!$process_only && isset($computed_style)) {
       file_unmanaged_save_data($computed_style, $engine->getDestinationUri(), FILE_EXISTS_REPLACE);
     }
 
@@ -114,18 +121,34 @@ function _less_css_alter_entry(&$css_entry) {
       try {
         // $autoprefixer = new AutoprefixerCliWrapper($compiled_file_real_path);
         // $autoprefixer->compile();
-      }
-      catch (\Exception $exception) {
+      } catch (\Exception $exception) {
         watchdog_exception('less', $exception, $exception->getMessage(), [], 'error');
       }
     }
   }
 
-  if ($engine->destinationExists() || $config->get('developer_options.devel')) {
-    // Point to the compiled file.
-    $compiled_file_relative_url = file_url_transform_relative(file_create_url($engine->getDestinationUri()));
-    $css_entry['data'] = ltrim($compiled_file_relative_url, '/');
-    return $css_entry['data'];
+  $return = [
+    'source_file_path' => $source_file_path,
+  ];
+
+  if ($config->get('developer_options.devel')) {
+    if ($process_only) {
+      return $return + [
+        'computed_style' => $computed_style,
+      ];
+    }
+
+    // Point to the compiled file instead of the source file.
+    return $return + [
+      'destination_file_path' => $engine->uriToRelativePath($engine->getDestinationUri()),
+    ];
+  }
+
+  // Point to the compiled file instead of the source file.
+  if ($engine->destinationExists()) {
+    return $return + [
+      'destination_file_path' => $engine->uriToRelativePath($engine->getDestinationUri()),
+    ];
   }
 
   return NULL;
@@ -135,7 +158,7 @@ function _less_css_alter_entry(&$css_entry) {
  * Clear the less cache files.
  */
 function less_clear_css_cache_files() {
-  $delete_stale = function($uri) {
+  $delete_stale = function ($uri) {
     // Default stale file threshold is 30 days.
     if (REQUEST_TIME - filemtime($uri) > \Drupal::config('system.performance')->get('stale_file_threshold')) {
       // Delete the file.

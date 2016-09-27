@@ -77,8 +77,24 @@ abstract class LessEngineBase extends PluginBase implements LessEngineInterface 
     $this->configuration['destination_uri'] = $destination_uri;
   }
 
+  /**
+   * @inheritdoc
+   */
   public function getDestinationUri() {
     return $this->configuration['destination_uri'];
+  }
+
+  /**
+   * Gets the file to the compiled file as required by \Drupal\Core\Asset\AssetResolver.
+   *
+   * @see \Drupal\Core\Asset\AssetResolver
+   *
+   * @inheritdoc
+   */
+  static public function uriToRelativePath($uri) {
+    $file_url = file_create_url($uri);
+    $compiled_file_relative_url = file_url_transform_relative($file_url);
+    return ltrim($compiled_file_relative_url, '/');
   }
 
   /**

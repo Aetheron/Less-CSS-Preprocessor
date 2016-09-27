@@ -13,7 +13,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 class LessEngineManager extends DefaultPluginManager {
 
   /**
-   * Media entity image config object.
+   * Less module config object.
    *
    * @var \Drupal\Core\Config\Config
    */
@@ -56,7 +56,11 @@ class LessEngineManager extends DefaultPluginManager {
    */
   public function createEngine() {
     $plugin_id = $this->config->get('engine');
-    return $this->createInstance($plugin_id);
+
+    /** @var \Drupal\less\Plugin\LessEngineInterface $engine */
+    $engine = $this->createInstance($plugin_id);
+
+    return $engine;
   }
 
 }
