@@ -3,3 +3,9 @@ services:
     class: Drupal\less\Plugin\LessEngineManager
     parent: default_plugin_manager
     arguments: ['@config.factory']
+
+  path_processor.less_cached_files:
+    class: Drupal\less\PathProcessor\PathProcessorLessCachedFiles
+    arguments: ['@stream_wrapper_manager']
+    tags:
+      - { name: path_processor_inbound, priority: 300 }
