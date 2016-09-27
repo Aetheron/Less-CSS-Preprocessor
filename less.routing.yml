@@ -13,3 +13,13 @@ less.watch_controller:
     _title: 'LESS watch'
   requirements:
     _permission: 'administer less'
+
+less.cached_file_private:
+  path: '/system/files/less/{cache_id}/{scheme}'
+  defaults:
+    _controller: '\Drupal\less\Controller\LessCachedFileDownloadController::deliver'
+  requirements:
+    _access: 'TRUE'
+
+route_callbacks:
+  - '\Drupal\less\Routing\LessCachedFileRoutes::routes'
