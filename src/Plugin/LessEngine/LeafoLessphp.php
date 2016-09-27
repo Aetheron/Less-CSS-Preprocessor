@@ -42,6 +42,8 @@ class LeafoLessphp extends LessEngineBase  {
         $parser->addImportDir($directory);
       }
 
+      $parser->setVariables($this->variables);
+
       $cache = $parser->cachedCompile($this->configuration['source_path']);
 
       $this->dependencies = array_keys($cache['files']);
