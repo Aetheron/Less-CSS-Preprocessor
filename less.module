@@ -279,6 +279,7 @@ function less_get_import_directories() {
   /** @var array $less_import_directories */
   $less_import_directories = $moduleHandler->invokeAll('less_import_directories');
   $moduleHandler->alter('less_import_directories', $less_import_directories);
+  \Drupal::theme()->alter('less_import_directories', $less_import_directories);
 
   return $less_import_directories;
 }
