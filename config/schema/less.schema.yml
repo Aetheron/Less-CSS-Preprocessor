@@ -20,6 +20,3 @@ less.settings:
         source_maps:
           type: boolean
           label: 'Source Maps'
-        watch_mode:
-          type: boolean
-          label: 'Watch Mode'

@@ -6,14 +6,6 @@ less.admin_settings:
   requirements:
     _permission: 'administer less'
 
-less.watch_controller:
-  path: '/ajax/less/watch'
-  defaults:
-    _controller: '\Drupal\less\Controller\LessWatchController::watch'
-    _title: 'LESS watch'
-  requirements:
-    _permission: 'administer less'
-
 less.cached_file_private:
   path: '/system/files/less/{cache_id}/{scheme}'
   defaults:

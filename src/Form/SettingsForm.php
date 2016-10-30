@@ -152,18 +152,6 @@ class SettingsForm extends ConfigFormBase {
       ),
     );
 
-    $form['developer_options']['watch_mode'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Watch Mode'),
-      '#description' => $this->t('Enable watch mode while developer mode is active to automatically reload styles when changes are detected, including changes to @import-ed files. Does not cause a page reload.'),
-      '#default_value' => $config->get('developer_options.watch_mode'),
-      '#states' => array(
-        'enabled' => array(
-          ':input[name="developer_options[devel]"]' => array('checked' => TRUE),
-        ),
-      ),
-    ];
-
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = [
       '#type' => 'submit',
@@ -185,7 +173,6 @@ class SettingsForm extends ConfigFormBase {
       ->set('autoprefixer', $form_state->getValue('autoprefixer'))
       ->set('developer_options.devel', $form_state->getValue(['developer_options', 'devel']))
       ->set('developer_options.source_maps', $form_state->getValue(['developer_options', 'source_maps']))
-      ->set('developer_options.watch_mode', $form_state->getValue(['developer_options', 'watch_mode']))
       ->save();
 
     parent::submitForm($form, $form_state);
