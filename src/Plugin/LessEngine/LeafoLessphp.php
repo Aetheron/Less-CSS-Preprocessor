@@ -61,7 +61,7 @@ class LeafoLessphp extends LessEngineBase  {
    * {@inheritdoc}
    */
   static public function getVersion() {
-    if (isset(\lessc::$VERSION)) {
+    if (class_exists('\lessc') && isset(\lessc::$VERSION)) {
       return \lessc::$VERSION;
     }
 
