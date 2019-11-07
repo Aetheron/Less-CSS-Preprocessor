@@ -257,6 +257,10 @@ function less_get_variables() {
   $less_variables = $moduleHandler->invokeAll('less_variables');
   $moduleHandler->alter('less_variables', $less_variables);
 
+  // Let themes alter less variables too
+  $themeManager = \Drupal::service('theme.manager');
+  $themeManager->alter('less_variables', $less_variables);
+
   return $less_variables;
 }
 
