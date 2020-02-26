@@ -244,7 +244,7 @@ function less_find_empty_directories($dir, $exclude = array()) {
  * @return array
  */
 function less_get_variables() {
-  $less_variables = drupal_static(__FUNCTION__);
+  $less_variables = &drupal_static(__FUNCTION__);
 
   if (isset($less_variables)) {
     return $less_variables;
