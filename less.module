@@ -244,6 +244,10 @@ function less_find_empty_directories($dir, $exclude = array()) {
  * @return array
  */
 function less_get_variables() {
+  /*
+  Static variables should be writable, otherwise they revert to empty
+  Changed by rvanlonk for CCEL
+   */
   $less_variables = &drupal_static(__FUNCTION__);
 
   if (isset($less_variables)) {
