@@ -109,13 +109,13 @@ Assuming your file is named "somename.css.less", Drupal automatically looks for 
 Variables
 ---------
 
-Variable defaults can be defined in `.theme` and `.module` files using `hook_less_variables_alter`
+Variable defaults can be defined in `.theme` and `.module` files using `hook_less_variables_alter()`
 
 .theme file:
 
     function hook_theme_less_variables_alter( array &$less_variables, $system_name )
     {
       	$less_variables['@defaults'] = '~"theme/less/defaults.less"';
-	      $less_variables['@styles'] = '~"theme/less"';
-	      $less_variables['@theme_images'] = '~"/img"';
+	$less_variables['@styles'] = '~"theme/less"';
+	$less_variables['@theme_images'] = '~"/img"';
     }
