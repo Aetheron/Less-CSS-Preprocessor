@@ -2,20 +2,19 @@
 LESS CSS Preprocessor
 =====================
 
-This module allows for automatic compilation of LESS styles sheets.
+This module allows for automatic compilation of LESS style sheets.
 
 Requirements
 ------------
 
-LESS requires at least one of three possible engines available:
+LESS requires at least one of two possible engines available:
 
 [oyejorge/less.php]: http://lessphp.gpeasy.com/
 [less.js]: http://lesscss.org/usage/#command-line-usage
-[leafo/lessphp]: http://leafo.net/lessphp/
 
 [Command Line Requirements]: #command
 
- -  [oyejorge/less.php]
+ -  [oyejorge/less.php] *archived*
     
     This is a pure PHP implementation, which is good for shared hosting, or if you don't feel comfortable
     installing or configuring software on your server.
@@ -26,18 +25,16 @@ LESS requires at least one of three possible engines available:
     
     1. [Libraries](https://drupal.org/project/libraries)
     2. [oyejorge/less.php] installed such that `Less.php` is located at `sites/all/libraries/less.php/Less.php`
+    
+    This project has been archived by the author and is extremely out of date. It does not include support for
+    LESS features released since v2, and will break when they are encountered. Use of this engine is highly
+    discouraged.
 
  -  [less.js]
     
     You can read about how to install here: [less.js]
     
     Please read [Command Line Requirements] to ensure that *less.js* is installed properly.
-
- - [leafo/lessphp] *Deprecated*
-    
-    *leafo/lessphp* library unpacked so that `lessc.inc.php` is located at `sites/all/libraries/lessphp/lessc.inc.php`.
-    
-    This library is no longer recommended as it lacks support for a majority of new features in the latest canonical LESS.
 
 Once installed, you must select your engine on 'admin/config/development/less'.
 
@@ -81,30 +78,15 @@ Then your compiled file will be `sites/[yoursite]/files/less/[random.string]/sit
 Usage
 -----
 
-The following two examples provide equivalent functionality.
+Include less files in your `module.library.yml` just as you would with regular css files
 
-[drupal_add_css()]:
+[module.library.yml]:
 
-    <?php
-    
-    $module_path = drupal_get_path('module', 'less_demo');
-    
-    drupal_add_css($module_path . '/styles/less_demo.css.less');
-    
-    ?>
-
-[drupal_add_css()]: https://api.drupal.org/api/drupal/includes%21common.inc/function/drupal_add_css/7
-
-[.info file]:
-
-    stylesheets[all][] = styles/less_demo.css.less
-    
-[.info file]: https://www.drupal.org/node/542202
-
-For automatic variable and function association with non globally added
-stylesheets, you can associate a stylesheet using this notation in .info files:
-
-    less[sheets][] = relative/path/to/stylesheet.css.less
+    source:
+      version: 1.x
+      css:
+        theme:
+          less/source.css.less: {}
 
 
 Compatibility
@@ -127,10 +109,13 @@ Assuming your file is named "somename.css.less", Drupal automatically looks for 
 Variables
 ---------
 
-Variable defaults can be defined in .info files for modules or themes. Any variables defined will be automatically available inside style sheets associated with the module or theme.
+Variable defaults can be defined in `.theme` and `.module` files using `hook_less_variables_alter`
 
-.info file:
+.theme file:
 
-    less[vars][@varname] = #bada55
-
-Look in less.api.php for LESS Variable hooks.
+    function hook_theme_less_variables_alter( array &$less_variables, $system_name )
+    {
+      	$less_variables['@defaults'] = '~"theme/less/defaults.less"';
+	      $less_variables['@styles'] = '~"theme/less"';
+	      $less_variables['@theme_images'] = '~"/img"';
+    }
